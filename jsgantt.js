@@ -97,23 +97,31 @@ JSGantt.TaskItem = function(pID, pName, pStart, pEnd, pColor, pLink, pMile, pRes
 		{
 			tmpPer =  Math.ceil((this.getEnd() - this.getStart()) /  ( 60 * 60 * 1000) );
 			if(tmpPer == 1)  
-				vDuration = '1 Hour';
+				vDuration = '1 godzina';
+			else if (tmpPer%10!=1 && tmpPer%10 < 5)
+				vDuration = tmpPer + ' godziny';
 			else
-				vDuration = tmpPer + ' Hours';
+				vDuration = tmpPer + ' godzin';
 		}
 		else if (vFormat=='minute')
 		{
 			tmpPer =  Math.ceil((this.getEnd() - this.getStart()) /  ( 60 * 1000) );
-			if(tmpPer == 1)  
-				vDuration = '1 Minute';
+			if(tmpPer == 1) 
+				vDuration = '1 minuta';
+			else if (tmpPer%10!=1 && tmpPer%10 < 5)
+				vDuration = tmpPer + ' minuty';
 			else
-				vDuration = tmpPer + ' Minutes';
+				vDuration = tmpPer + ' minut';
 		}
 		else //if(vFormat == 'day')
 		{
 			tmpPer =  Math.ceil((this.getEnd() - this.getStart()) /  (24 * 60 * 60 * 1000) + 1);
-			if(tmpPer == 1)  vDuration = '1 Day';
-			else             vDuration = tmpPer + ' Days';
+			if(tmpPer == 1) 
+				vDuration = '1 dzień';
+			else if (tmpPer%10!=1 && tmpPer%10 < 5)
+				vDuration = tmpPer + ' dni';
+			else
+				vDuration = tmpPer + ' dni';
 		}
 
 		//else if(vFormat == 'week') {
@@ -197,6 +205,11 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 		vFormatArr = new Array();
 		for(var i = 0; i < arguments.length; i++) {vFormatArr[i] = arguments[i];}
 		if(vFormatArr.length>4){vFormatArr.length=4;}
+	};
+	this.setMonthArr = function()
+	{
+		vMonthArr = new Array();
+		for(var i = 0; i < arguments.length; i++) {vMonthArr[i] = arguments[i];}
 	};
 	this.setShowRes  = function(pShow) { vShowRes  = pShow; };
 	this.setShowDur  = function(pShow) { vShowDur  = pShow; };
@@ -409,9 +422,9 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 		var vNumDays = 0;
 		var vDayWidth = 0;
 		var vStr = "";
-		var vNameWidth = 220;	
+		var vNameWidth = 70;
 		var vStatusWidth = 70;
-		var vLeftWidth = 15 + 220 + 70 + 70 + 70 + 70 + 70;
+		var vLeftWidth = 15 + vNameWidth + 70 + 70 + 70 + 70 + 70;
 
 		if(vTaskList.length > 0)
 		{
@@ -493,11 +506,11 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				'  <TD style="BORDER-TOP: #efefef 1px solid; WIDTH: 15px; HEIGHT: 20px"></TD>' +
 				'  <TD style="BORDER-TOP: #efefef 1px solid; WIDTH: ' + vNameWidth + 'px; HEIGHT: 20px"><NOBR></NOBR></TD>' ;
 
-			if(vShowRes ==1) vLeftTable += '  <TD style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid; WIDTH: 60px; HEIGHT: 20px" align=center nowrap>Resource</TD>' ;
-			if(vShowDur ==1) vLeftTable += '  <TD style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid; WIDTH: 60px; HEIGHT: 20px" align=center nowrap>Duration</TD>' ;
-			if(vShowComp==1) vLeftTable += '  <TD style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid; WIDTH: 60px; HEIGHT: 20px" align=center nowrap>% Comp.</TD>' ;
-			if(vShowStartDate==1) vLeftTable += '  <TD style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid; WIDTH: 60px; HEIGHT: 20px" align=center nowrap>Start Date</TD>' ;
-			if(vShowEndDate==1) vLeftTable += '  <TD style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid; WIDTH: 60px; HEIGHT: 20px" align=center nowrap>End Date</TD>' ;
+			if(vShowRes ==1) vLeftTable += '  <TD style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid; WIDTH: 60px; HEIGHT: 20px" align=center nowrap>Zasób</TD>' ;
+			if(vShowDur ==1) vLeftTable += '  <TD style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid; WIDTH: 60px; HEIGHT: 20px" align=center nowrap>Czas trwania</TD>' ;
+			if(vShowComp==1) vLeftTable += '  <TD style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid; WIDTH: 60px; HEIGHT: 20px" align=center nowrap>% Ukoń.</TD>' ;
+			if(vShowStartDate==1) vLeftTable += '  <TD style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid; WIDTH: 60px; HEIGHT: 20px" align=center nowrap>Rozpoczęcie</TD>' ;
+			if(vShowEndDate==1) vLeftTable += '  <TD style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid; WIDTH: 60px; HEIGHT: 20px" align=center nowrap>Zakończenie</TD>' ;
 
 			vLeftTable += '</TR>';
 
@@ -544,8 +557,14 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 					vLeftTable += '<span style="color: #000000; font-weight:bold; FONT-SIZE: 12px;">&nbsp&nbsp&nbsp</span>';
 				}
 
-				vLeftTable += 
-					'<span onclick=JSGantt.taskLink("' + vTaskList[i].getLink() + '",300,200); style="cursor:pointer"> ' + vTaskList[i].getName() + '</span></NOBR></TD>' ;
+				if (vTaskList[i].getLink().length>0)
+				{
+					vLeftTable += '<span title="'+ vTaskList[i].getName() +'" onclick=JSGantt.taskLink("' + vTaskList[i].getLink() + '",300,200); style="cursor:pointer"> ' + vTaskList[i].getName() + '</span></NOBR></TD>' ;
+				}
+				else
+				{
+					vLeftTable += '<span title="'+ vTaskList[i].getName() +'"> ' + vTaskList[i].getName() + '</span></NOBR></TD>' ;
+				}
 
 				if(vShowRes ==1) vLeftTable += '  <TD class=gname style="WIDTH: 60px; HEIGHT: 20px; TEXT-ALIGN: center; BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid;" align=center><NOBR>' + vTaskList[i].getResource() + '</NOBR></TD>' ;
 				if(vShowDur ==1) vLeftTable += '  <TD class=gname style="WIDTH: 60px; HEIGHT: 20px; TEXT-ALIGN: center; BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid;" align=center><NOBR>' + vTaskList[i].getDuration(vFormat) + '</NOBR></TD>' ;
@@ -562,38 +581,38 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 
 			if (vFormatArr.join().indexOf("minute")!=-1)
 			{
-				if (vFormat=='minute') vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" VALUE="minute" checked>Minute';
-				else                vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" onclick=JSGantt.changeFormat("minute",'+vGanttVar+'); VALUE="minute">Minute';
+				if (vFormat=='minute') vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" VALUE="minute" checked>Minuty';
+				else                vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" onclick=JSGantt.changeFormat("minute",'+vGanttVar+'); VALUE="minute">Minuty';
 			}
 
 			if (vFormatArr.join().indexOf("hour")!=-1)
 			{
-				if (vFormat=='hour') vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" VALUE="hour" checked>Hour';
-				else                vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" onclick=JSGantt.changeFormat("hour",'+vGanttVar+'); VALUE="hour">Hour';
+				if (vFormat=='hour') vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" VALUE="hour" checked>Godziny';
+				else                vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" onclick=JSGantt.changeFormat("hour",'+vGanttVar+'); VALUE="hour">Godziny';
 			}
 
 			if (vFormatArr.join().indexOf("day")!=-1)
 			{
-				if (vFormat=='day') vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" VALUE="day" checked>Day';
-				else                vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" onclick=JSGantt.changeFormat("day",'+vGanttVar+'); VALUE="day">Day';
+				if (vFormat=='day') vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" VALUE="day" checked>Dni';
+				else                vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" onclick=JSGantt.changeFormat("day",'+vGanttVar+'); VALUE="day">Dni';
 			}
 
 			if (vFormatArr.join().indexOf("week")!=-1)
 			{
-				if (vFormat=='week') vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" VALUE="week" checked>Week';
-				else                vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" onclick=JSGantt.changeFormat("week",'+vGanttVar+') VALUE="week">Week';
+				if (vFormat=='week') vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" VALUE="week" checked>Tygodnie';
+				else                vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" onclick=JSGantt.changeFormat("week",'+vGanttVar+') VALUE="week">Tygodnie';
 			}
 
 			if (vFormatArr.join().indexOf("month")!=-1)
 			{ 
-				if (vFormat=='month') vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" VALUE="month" checked>Month';
-				else                vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" onclick=JSGantt.changeFormat("month",'+vGanttVar+') VALUE="month">Month';
+				if (vFormat=='month') vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" VALUE="month" checked>Miesiące';
+				else                vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" onclick=JSGantt.changeFormat("month",'+vGanttVar+') VALUE="month">Miesiące';
 			}
 
 			if (vFormatArr.join().indexOf("quarter")!=-1)
 			{
-				if (vFormat=='quarter') vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" VALUE="quarter" checked>Quarter';
-				else                vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" onclick=JSGantt.changeFormat("quarter",'+vGanttVar+') VALUE="quarter">Quarter';
+				if (vFormat=='quarter') vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" VALUE="quarter" checked>Kwartały';
+				else                vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" onclick=JSGantt.changeFormat("quarter",'+vGanttVar+') VALUE="quarter">Kwartały';
 			}
 			
 			// vLeftTable += '<INPUT TYPE=RADIO NAME="other" VALUE="other" style="display:none"> .';
@@ -818,7 +837,7 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 
 					if(vNxtDate <= vMaxDate) 
 					{
-						vDateRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; HEIGHT: 19px; BORDER-LEFT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center width:'+vColWidth+'px><div style="width: '+vColWidth+'px">Qtr. ' + vQuarterArr[vTmpDate.getMonth()] + '</div></td>';
+						vDateRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; HEIGHT: 19px; BORDER-LEFT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center width:'+vColWidth+'px><div style="width: '+vColWidth+'px">Kw. ' + vQuarterArr[vTmpDate.getMonth()] + '</div></td>';
 						if( vCurrDate >= vTmpDate && vCurrDate < vNxtDate ) 
 							vItemRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center><div style="width: '+vColWidth+'px">&nbsp&nbsp</div></td>';
 						else

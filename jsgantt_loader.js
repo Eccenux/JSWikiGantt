@@ -1,10 +1,10 @@
-// globalny element gantowy
+﻿// globalny obiekt gantowy
 var oJSGant;
 
-// id elementu w kt�rym wy�wietlany jest harmonogram
+// id elementu w którym wyświetlany jest harmonogram
 var elGantDivID = 'GanttChartDIV';
 
-// funkcja wczytuj�ca dane
+// funkcja wczytująca dane
 addOnloadHook(function()
 {
 	var elGantDiv = document.getElementById(elGantDivID);
@@ -21,17 +21,31 @@ addOnloadHook(function()
 	}
 	catch(e)
 	{
-		var strError = 'Dodaj link do artku�u zawieraj�cego dane XML w elemencie z id "'+elGantDivID+'"';
+		var strError = 'Dodaj link do artkułu zawierającego dane XML w elemencie z id "'+elGantDivID+'"';
 		elGantDiv.appendChild(document.createTextNode(strError));
 		return;
 	}
 
 	oJSGant = new JSGantt.GanttChart('oJSGant', elGantDiv, 'day');
-	oJSGant.setDateInputFormat ();
-	oJSGant.setDateDisplayFormat ();
-	oJSGant.setShowRes(1); // Show/Hide Responsible (0/1)
-	oJSGant.setShowDur(1); // Show/Hide Duration (0/1)
-	oJSGant.setShowComp(1); // Show/Hide % Complete(0/1)
+	/*
+	oJSGant.setDateInputFormat ('yyyy-mm-dd');
+	oJSGant.setDateDisplayFormat ('yyyy-mm-dd');
+	*/
+	/*
+	// defaults
+	var vDateInputFormat = "mm/dd/yyyy";
+	var vDateDisplayFormat = "mm/dd/yy";
+	var vFormatArr	= new Array("day","week","month","quarter");
+	var vMonthArr     = new Array("January","February","March","April","May","June","July","August","September","October","November","December");
+	*/
+	oJSGant.setMonthArr("Styczeń","Luty","Marzec","Kwiecień","Maj","Czerwiec","Lipiec","Sierpień","Wrzesień","Październik","Listopad","Grudzień");
+	oJSGant.setDateDisplayFormat ('yyyy-mm-dd');
+	
+	oJSGant.setShowRes(0); // Show/Hide Responsible (0/1)
+	oJSGant.setShowDur(0); // Show/Hide Duration (0/1)
+	oJSGant.setShowComp(0); // Show/Hide % Complete(0/1)
+	oJSGant.setShowStartDate(0);
+	oJSGant.setShowEndDate(0);
 	oJSGant.setCaptionType('Resource');  // Set to Show Caption (None,Caption,Resource,Duration,Complete)
 	
 	if (oJSGant)
@@ -44,7 +58,7 @@ addOnloadHook(function()
 	}
 	else
 	{
-		var strError = 'Niespodziewany b��d!';
+		var strError = 'Niespodziewany błąd!';
 		elGantDiv.appendChild(document.createTextNode(strError));
 	}
 });
