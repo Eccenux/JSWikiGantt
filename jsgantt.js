@@ -581,11 +581,12 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 
 				if (vTaskList[i].getLink().length>0)
 				{
-					vLeftTable += '<span title="'+ vTaskList[i].getName() +'" onclick=JSGantt.taskLink("' + vTaskList[i].getLink() + '",300,200); style="cursor:pointer"> ' + vTaskList[i].getName() + '</span></NOBR></TD>' ;
+					//vLeftTable += '<span title="'+ vTaskList[i].getName() +'" onclick=JSGantt.taskLink("' + vTaskList[i].getLink() + '",300,200); style="cursor:pointer"> ' + vTaskList[i].getName() + '</span></NOBR></TD>' ;
+					vLeftTable += ' <span title="'+ vTaskList[i].getName() +'" class="linked_task"><a onclick="JSGantt.taskLink(\'' + vTaskList[i].getLink() + '\',700,600); return false;" href="'+ vTaskList[i].getLink() +'" target="_blank">' + vTaskList[i].getName() + '</a></span></NOBR></TD>' ;
 				}
 				else
 				{
-					vLeftTable += '<span title="'+ vTaskList[i].getName() +'"> ' + vTaskList[i].getName() + '</span></NOBR></TD>' ;
+					vLeftTable += ' <span title="'+ vTaskList[i].getName() +'">' + vTaskList[i].getName() + '</span></NOBR></TD>' ;
 				}
 
 				if(vShowRes ==1) vLeftTable += '  <TD class=gname style="WIDTH: 60px; HEIGHT: 20px; TEXT-ALIGN: center; BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid;" align=center><NOBR>' + vTaskList[i].getResource() + '</NOBR></TD>' ;

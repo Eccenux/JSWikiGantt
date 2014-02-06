@@ -7,6 +7,9 @@
 	To activate this extension, add the following into your LocalSettings.php file:
 	require_once('$IP/extensions/JSWikiGantt/JSWikiGantt.php');
 	
+	Note!
+		PHP 5.1 or higher is required for this extension (needed for the XML/DOM functions and some class specifc stuff).
+	
 	@ingroup Extensions
 	@author Maciej Jaros <egil@wp.pl> and others (see description)
 	@version 0.0.1
@@ -29,33 +32,37 @@ if( !defined( 'MEDIAWIKI' ) ) {
 $wgExtensionCredits['parserhook'][] = array(
 	'path'         => __FILE__,
 	'name'         => 'JSWikiGantt',
-	'version'      => '0.0.1',
+	'version'      => '0.1.0',
 	'author'       => 'Maciej Jaros and others (see description)', 
 	'url'          => 'http://www.mediawiki.org/wiki/Extension:JSWikiGantt',
 	'description'  => ''
-		+'This extension adds a <jsgantt> tag in which you can define a Gantt diagram data to be drawn. Currently only one diagram per page.'
-		+'\nNote! This extension is based on JSGantt project started by Shlomy Gantz and Xaprb JavaScript date formatting by Baron Schwartz.'
-		+'\nSee jsgantt.js and date-functions.js for licensing details of this modules.'
+		." This extension adds a ''jsgantt'' tag in which you can define a Gantt diagram data to be drawn. Currently only one diagram per page."
+		.' Note! This extension is based on JSGantt project started by Shlomy Gantz and Xaprb JavaScript date formatting by Baron Schwartz.'
+		.' See jsgantt.js and date-functions.js for licensing details of this modules.'
 );
+
+//
+// Absolute path
+//
+$wgJSGanttDir = rtrim(dirname(__FILE__), "/\ ");
+
+//
+// Configuration file
+//
+require_once ("{$wgJSGanttDir}/JSWikiGantt.config.php");
 
 //
 // Class setup
 //
-$wgJSGanttDir = dirname(__FILE__);
-$wgAutoloadClasses['ecJSGantt'] = "{$wgJSGanttDir}/JSGantt.body.php";
+$wgAutoloadClasses['ecJSGantt'] = "{$wgJSGanttDir}/JSWikiGantt.body.php";
 
 //
-// add hook setup and hook <jsgantt> tag for this extension
+// add hook setup and init class/object
 //
 $wgHooks['ParserFirstCallInit'][] = 'efJSGanttSetup';
 function efJSGanttSetup( &$parser )
 {
-	efJSGanttSetupHead();
-	$parser->setHook( 'jsgantt', array('ecJSGantt', 'render') );
+	// other hooks are added upon construct
+	new ecJSGantt;
 	return true;
 }
-
-//
-// Functions
-//
-require_once("$IP/extensions/JSWikiGantt/JSWikiGantt.body.php");
