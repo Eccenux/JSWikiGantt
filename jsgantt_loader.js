@@ -36,6 +36,7 @@ var oJSGantLoader = {
 	lang : {
 		'No XML Link Error' : 'Błąd! Brak linku do artkułu zawierającego dane haromonogramu. W elemencie z id "%el_id%" należy podać link do artykułu z danymi w formacie XML.',
 		'Unexpected Error' : 'Niespodziewany błąd!',
+		'XML Parse Error' : 'Błąd odczytu! Nieprawidłowy plik XML lub nieprawidłowy adres.',
 		'':''
 	}
 };
@@ -67,8 +68,7 @@ oJSGantLoader.load = function()
 	try
 	{
 		var strXmlUrl = elGantDiv.getElementsByTagName('a')[0].href;
-		//strXmlUrl += '?action=raw';
-		strXmlUrl = 'project.xml';
+		strXmlUrl += '?action=raw';
 	}
 	catch(e)
 	{
@@ -93,7 +93,15 @@ oJSGantLoader.load = function()
 	{
 		// Parameters (pID, pName, pStart, pEnd, pColor, pLink, pMile, pRes,  pComp, pGroup, pParent, pOpen)
 		// use the XML file parser 
-		JSGantt.parseXML(strXmlUrl,oJSGant)
+		try
+		{
+			JSGantt.parseXML(strXmlUrl,oJSGant)
+		}
+		catch(e)
+		{
+			this.displayError(this.lang['XML Parse Error']);
+			return;
+		}
 		oJSGant.Draw(this.conf.intNamesWidth);	
 		oJSGant.DrawDependencies();
 	}

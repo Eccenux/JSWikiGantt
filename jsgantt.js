@@ -1541,9 +1541,10 @@ JSGantt.AddXMLTask = function(pGanttVar)
 {
 	Task=xmlDoc.getElementsByTagName("task");
 	
-	var n = xmlDoc.documentElement.childNodes.length;	// the number of tasks. IE gets this right, but mozilla add extra ones (Whitespace)
+	//var n = xmlDoc.documentElement.childNodes.length;	// the number of tasks. IE gets this right, but mozilla add extra ones (Whitespace)
 	
-	for(var i=0;i<n;i++)
+	//for(var i=0;i<n;i++)
+	for(var i=0;i<Task.length;i++)
 	{
 		// optional parameters may not have an entry (Whitespace from mozilla also returns an error )
 		// Task ID must NOT be zero other wise it will be skipped
