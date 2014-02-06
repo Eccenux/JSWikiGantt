@@ -3,18 +3,22 @@
 	Main JSWikiGantt extension class
 */
 class ecJSGantt {
-	var $strInlineOutputMarker;                    //<! marker for the inline output of scripts (=$wgJSGanttInlineOutputMarker)
-	var $strSelfURLBase;                           //<! this extension base URL (virtual path)
-	var $strSelfDir;                               //<! this extension directory (physical path)
-	var $strJSi18nFile = 'jsgantt_i18n_%lang%.js'; //<! js lang file save path (cache)
-	                                               //<! @note should be this extension based
-	var $isInline = false;
-	var $isExternal = false;
+	public $strSelfURLBase;                           //<! this extension base URL (virtual path)
+	public $strSelfDir;                               //<! this extension directory (physical path)
+	public $strJSi18nFile = 'jsgantt_i18n_%lang%.js'; //<! js lang file save path (cache)
+	                                                  //<! @note should be this extension based
+
+	private $strInlineOutputMarker;                   //<! marker for the inline output of scripts (=$wgJSGanttInlineOutputMarker)
+	private $isInline = false;                        //<! is in inline Gantt data mode (XML in article)
+	private $isExternal = false;                      //<! is in external Gantt data mode (XML on an external page)
+	private $isHeadDone = false;                      //<! if head is already added (might be important when more then one diagram per page would be possible)
+	private $strInlineOutput = '';                    //<! this holds parsed JS scripts to be put after tidy
+	private $config;                                  //<! copy of $wgJSGanttConfig
 	
 	/**
 		Basic setup
 	*/
-	function __construct() {
+	public function __construct() {
 		global $wgParser, $wgHooks, $wgScriptPath, $wgParserOutputHooks, $wgLang
 			, $wgJSGanttConfig, $wgJSGanttInlineOutputMarker, $wgJSGanttDir;
 		
@@ -27,14 +31,12 @@ class ecJSGantt {
 		$wgParserOutputHooks['ecJSGantt'] = array( $this, 'outputHook' );
 		
 		// init variables/attributes
-		$this->isHeadDone = false;
-		$this->strInlineOutput = '';
-		$this->config = $wgJSGanttConfig;
+		$this->config                = $wgJSGanttConfig;
 		$this->strInlineOutputMarker = $wgJSGanttInlineOutputMarker;
-		$this->strSelfURLBase = "{$wgScriptPath}/extensions/JSWikiGantt";
-		$this->strSelfDir = $wgJSGanttDir;
+		$this->strSelfURLBase        = "{$wgScriptPath}/extensions/JSWikiGantt";
+		$this->strSelfDir            = $wgJSGanttDir;
 		
-		$this->strJSi18nFile = str_replace( '%lang%', $wgLang->getCode(), $this->strJSi18nFile );
+		$this->strJSi18nFile         = str_replace( '%lang%', $wgLang->getCode(), $this->strJSi18nFile );
 	}
 
 	/**
@@ -45,7 +47,7 @@ class ecJSGantt {
 		@param $parser - not needed
 		@param $frame - not needed
 	*/
-	function render( $input, $args, $parser, $frame ) {
+	public function render( $input, $args, $parser, $frame ) {
 		$strRendered = '';
 		
 		// load from some other article
@@ -53,7 +55,7 @@ class ecJSGantt {
 			$this->isExternal = true;
 			$strRendered = $this->renderXMLLoader( $input, $args, $parser, $frame );
 		// build from content
-		} else if ( !$this->isInline && !$this->isExternal ) { // yes, currently only one per page
+		} elseif ( !$this->isInline && !$this->isExternal ) { // yes, currently only one per page
 			$this->isInline = true;
 			$strRendered = $this->renderInnerXML( $input, $args, $parser, $frame );
 		}
@@ -74,7 +76,7 @@ class ecJSGantt {
 		
 		@sa ecJSGantt::render()
 	*/
-	function renderXMLLoader( $input, $args, $parser, $frame ) {
+	private function renderXMLLoader( $input, $args, $parser, $frame ) {
 		//$out = $parser->recursiveTagParse( $input, $frame );
 		$out = $parser->replaceInternalLinks( $input, $frame );	// just parse links
 		return ''
@@ -88,7 +90,7 @@ class ecJSGantt {
 	/**
 		Escapes XML string from user for JS
 	*/
-	function escapeXMLString4JS( $value ) {
+	private function escapeXMLString4JS( $value ) {
 		// quite simple for now - might want to allow html inside tags...
 		return htmlspecialchars( $value );
 	}
@@ -98,9 +100,11 @@ class ecJSGantt {
 		
 		@todo get content of the tag given by valName or an attribute with the same name
 	*/
-	function getXMLIntVal( $task, $valName, $defaultVal ) {
+	private function getXMLIntVal( $task, $valName, $defaultVal ) {
 		// quite simple for now - might want to allow html inside tags...
-		$val = intval( @$task->getElementsByTagName( $valName )->item( 0 )->nodeValue );
+		wfSuppressWarnings();
+		$val = intval( $task->getElementsByTagName( $valName )->item( 0 )->nodeValue );
+		wfRestoreWarnings();
 		if( empty( $val ) ) {
 			return $defaultVal;
 		}
@@ -111,9 +115,11 @@ class ecJSGantt {
 		
 		@todo get content of the tag given by valName or an attribute with the same name
 	*/
-	function getXMLStrVal( $task, $valName, $defaultVal ) {
+	private function getXMLStrVal( $task, $valName, $defaultVal ) {
 		// quite simple for now - might want to allow html inside tags...
-		$val = $this->escapeXMLString4JS( @$task->getElementsByTagName( $valName )->item( 0 )->nodeValue );
+		wfSuppressWarnings();
+		$val = $this->escapeXMLString4JS( $task->getElementsByTagName( $valName )->item( 0 )->nodeValue );
+		wfRestoreWarnings();
 		if( empty( $val ) ) {
 			return $defaultVal;
 		}
@@ -125,9 +131,7 @@ class ecJSGantt {
 
 		@sa ecJSGantt::render()
 	*/
-	function renderInnerXML( $input, $args, $parser, $frame ) {
-		global $wgJsMimeType;
-		
+	private function renderInnerXML( $input, $args, $parser, $frame ) {
 		$doc = new DOMDocument();
 		/*
 		// DEBUG
@@ -137,9 +141,11 @@ class ecJSGantt {
 		."</pre>"
 		;
 		*/
-		@$doc->loadXML( '<root>'.$input.'</root>' );
-
-		$tasks = @$doc->documentElement->getElementsByTagName( "task" );
+		// get task elements
+		wfSuppressWarnings();
+		$doc->loadXML( '<root>'.$input.'</root>' );
+		$tasks = $doc->documentElement->getElementsByTagName( "task" );
+		wfRestoreWarnings();
 		
 		if ( $tasks->length==0 ) {
 			// TODO error message
@@ -154,14 +160,18 @@ class ecJSGantt {
 		$strScript = '';
 		for ( $i = 0; $i < $tasks->length; $i++ ) {
 			// The ID is required!
-			$pID = intval( @$tasks->item( $i )->getElementsByTagName( "pID" )->item( 0 )->nodeValue );
+			wfSuppressWarnings();
+			$pID = intval( $tasks->item( $i )->getElementsByTagName( "pID" )->item( 0 )->nodeValue );
+			wfRestoreWarnings();
 			if( empty( $pID ) ) {
-				// TODO some error message here?
+				//! @todo some error message here?
 				continue;
 			}
 			
 			// check if auto link should be added
-			$isAddAutoLink = @$tasks->item( $i )->getAttribute( 'autolink' );
+			wfSuppressWarnings();
+			$isAddAutoLink = $tasks->item( $i )->getAttribute( 'autolink' );
+			wfRestoreWarnings();
 			if ( $isAddAutoLink=='' ) {
 				$isAddAutoLink = $isAddAutoLinks;
 			} else {
@@ -169,7 +179,7 @@ class ecJSGantt {
 			}
 			
 			// other values
-			$pName    = $this->getXMLStrVal( $tasks->item( $i ), "pName"   , "No Task Name" );	// TODO: Allow HTML/Wiki here?
+			$pName    = $this->getXMLStrVal( $tasks->item( $i ), "pName"   , "No Task Name" );	//! @todo Allow HTML/Wiki here?
 			$pColor   = $this->getXMLStrVal( $tasks->item( $i ), "pColor"  , "0000ff" );
 			$pParent  = $this->getXMLIntVal( $tasks->item( $i ), "pParent" , 0 );
 			$pStart   = $this->getXMLStrVal( $tasks->item( $i ), "pStart"  , "" );
@@ -208,7 +218,7 @@ class ecJSGantt {
 		// prepare script header
 		if ( !empty( $strScript ) ) {
 			$strScript = ''
-				."<script type='{$wgJsMimeType}'>"
+				."<script>"
 			//		."\n".$this->getJSi18nMsgs()
 					."\noJSGantInline.init()"
 					."\n$strScript"
@@ -232,7 +242,7 @@ class ecJSGantt {
 	/**
 		Gets "link" (URL path) for the given extension's script
 	*/
-	function getJSi18nMsgs() {
+	private function getJSi18nMsgs() {
 		return "
 		/* gantt core */
 		JSGantt.lang['format-label']      = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-format-label' ) )."';
@@ -298,7 +308,7 @@ class ecJSGantt {
 		
 		@note blindly assuming that JSWikiGantt.i18n.php will change more often then other i18n files
 	*/
-	function createJSi18nFile() {
+	private function createJSi18nFile() {
 		$strOutputPath = "{$this->strSelfDir}/{$this->strJSi18nFile}";
 		$strSrcPath = "{$this->strSelfDir}/JSWikiGantt.i18n.php";
 		
@@ -318,7 +328,7 @@ class ecJSGantt {
 	/**
 		Checks if a source file were changed after dest path
 	*/
-	function isSrcChanged( $strSrcPath, $strDestPath ) {
+	private function isSrcChanged( $strSrcPath, $strDestPath ) {
 		if ( !file_exists( $strDestPath ) ) {
 			return true;
 		}
@@ -332,7 +342,7 @@ class ecJSGantt {
 	/**
 		Gets "link" (URL path) for the given extension's script
 	*/
-	function getCSSJSLink( $strFileName ) {
+	private function getCSSJSLink( $strFileName ) {
 		global $wgJSGanttScriptVersion;
 		
 		return "{$this->strSelfURLBase}/{$strFileName}?{$wgJSGanttScriptVersion}";
@@ -341,7 +351,7 @@ class ecJSGantt {
 	/**
 		"Decode" script content after "Tidy"...
 	*/
-	function inlineOutput( $parser, &$text ) {
+	public function inlineOutput( $parser, &$text ) {
 		$text = str_replace( $this->strInlineOutputMarker, $this->strInlineOutput, $text );
 		return true;
 	}
@@ -349,9 +359,7 @@ class ecJSGantt {
 	/**
 		Setup our additional styles and scripts
 	*/
-	function setupHeaders( $outputPage ) {
-		global $wgJSGanttConfig;
-		
+	private function setupHeaders( $outputPage ) {
 		if ( $outputPage->hasHeadItem( 'jsganttCSS' ) && $outputPage->hasHeadItem( 'jsganttJS' )
 			&& $outputPage->hasHeadItem( 'jsganttDateJS' ) )
 		{
@@ -371,7 +379,7 @@ class ecJSGantt {
 		// Only works out of cache => has to be moved to the output
 		if ( $this->isInline ) {
 			$outputPage->addHeadItem('jsganttInlineJS' , Html::linkedScript( "{$thisExtPath}/jsgantt_inline.js?$wgJSGanttScriptVersion" ) );
-		} else if ( $this->isExternal && !empty( $wgJSGanttConfig['ExternalXMLEnabled'] ) ) {
+		} elseif ( $this->isExternal && !empty( $wgJSGanttConfig['ExternalXMLEnabled'] ) ) {
 			$outputPage->addHeadItem('jsganttLoaderJS' , Html::linkedScript( "{$thisExtPath}/jsgantt_loader.js?$wgJSGanttScriptVersion" ) );
 		}
 		*/
@@ -380,9 +388,7 @@ class ecJSGantt {
 	/**
 		Output Hook to setup extra headers
 	*/
-	function outputHook( $outputPage, $parserOutput, $data ) {
-		//global $wgScriptPath;
-		
+	public function outputHook( $outputPage, $parserOutput, $data ) {
 		$this->setupHeaders( $outputPage );
 	}
 }
