@@ -558,10 +558,20 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 
 				vID = vTaskList[i].getID();
 
-				if(vTaskList[i].getVisible() == 0) 
-					vLeftTable += '<TR id=child_' + vID + ' bgcolor=#' + vBGColor + ' style="display:none"  onMouseover=oJSGant.mouseOver(this,' + vID + ',"left","' + vRowType + '") onMouseout=oJSGant.mouseOut(this,' + vID + ',"left","' + vRowType + '")>' ;
+				var isDuplicateTaskToBeMovedUp = false;
+				if (vLeftTable.indexOf(' id=child_' + vID + ' ')==-1)	// to allow more bars on one row
+				{
+					if(vTaskList[i].getVisible() == 0) 
+						vLeftTable += '<TR id=child_' + vID + ' bgcolor=#' + vBGColor + ' style="display:none"  onMouseover=oJSGant.mouseOver(this,' + vID + ',"left","' + vRowType + '") onMouseout=oJSGant.mouseOut(this,' + vID + ',"left","' + vRowType + '")>' ;
+					else
+						vLeftTable += '<TR id=child_' + vID + ' bgcolor=#' + vBGColor + ' onMouseover=oJSGant.mouseOver(this,' + vID + ',"left","' + vRowType + '") onMouseout=oJSGant.mouseOut(this,' + vID + ',"left","' + vRowType + '")>' ;
+				}
 				else
-					vLeftTable += '<TR id=child_' + vID + ' bgcolor=#' + vBGColor + ' onMouseover=oJSGant.mouseOver(this,' + vID + ',"left","' + vRowType + '") onMouseout=oJSGant.mouseOut(this,' + vID + ',"left","' + vRowType + '")>' ;
+				{
+					isDuplicateTaskToBeMovedUp = true;
+					vLeftTable += '<TR style="display:none;">' ;
+				}
+
 
 				vLeftTable += 
 					'  <td class="gname"><nobr><span style="color: #aaaaaa">';
@@ -935,10 +945,19 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 					vNumUnits = (vTaskList[i].getEnd() - vTaskList[i].getStart()) / (  60 * 1000) + 1;
 				}
 
-				if(vTaskList[i].getVisible() == 0)
-					vRightTable += '<DIV id=childgrid_' + vID + ' style="position:relative; display:none;">';
+				var isDuplicateTaskToBeMovedUp = false;
+				if (vRightTable.indexOf(' id=childgrid_' + vID + ' ')==-1)	// to allow more bars on one row
+				{
+					if(vTaskList[i].getVisible() == 0)
+						vRightTable += '<DIV id=childgrid_' + vID + ' style="position:relative; display:none;">';
+					else
+						vRightTable += '<DIV id=childgrid_' + vID + ' style="position:relative">';
+				}
 				else
-					vRightTable += '<DIV id=childgrid_' + vID + ' style="position:relative">';
+				{
+					isDuplicateTaskToBeMovedUp = true;
+					vRightTable += '<DIV style="position:relative; top:-20px;">';
+				}
 				
 				if( vTaskList[i].getMile())
 				{
@@ -1045,9 +1064,12 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 					}
 					else
 					{
-						vDivStr = '<DIV><TABLE style="position:relative; top:0px; width: ' + vChartWidth + 'px;">' +
-							'<TR id=childrow_' + vID + ' class=yesdisplay bgColor=#ffffff onMouseover=oJSGant.mouseOver(this,' + vID + ',"right","row") onMouseout=oJSGant.mouseOut(this,' + vID + ',"right","row")>' + vItemRowStr + '</TR></TABLE></DIV>';
-						vRightTable += vDivStr;
+						if (!isDuplicateTaskToBeMovedUp)
+						{
+							vDivStr = '<DIV><TABLE style="position:relative; top:0px; width: ' + vChartWidth + 'px;">' +
+								'<TR id=childrow_' + vID + ' class=yesdisplay bgColor=#ffffff onMouseover=oJSGant.mouseOver(this,' + vID + ',"right","row") onMouseout=oJSGant.mouseOut(this,' + vID + ',"right","row")>' + vItemRowStr + '</TR></TABLE></DIV>';
+							vRightTable += vDivStr;
+						}
 						
 						// Draw Task Bar  which has outer DIV with enclosed colored bar div, and opaque completion div
 						vRightTable +=
@@ -1080,6 +1102,27 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 			vMainTable += vRightTable + '</DIV></TD></TR></TBODY></TABLE></div>';
 
 			vDiv.innerHTML = vMainTable;
+
+			// Chart window at full available size
+			try
+			{
+				document.getElementById('rightside').style.width=(vDiv.clientWidth - vNameWidth - 20)+'px';// -20 <= some startup width bug (in Vector only?)
+			} catch(e) {}
+			if (typeof (this.isResizeAlreadyAdded)=='undefined')
+			{
+				this.isResizeAlreadyAdded = true;
+				smpAddEvent(
+					window, 'resize'
+					, function()
+					{
+						try
+						{
+							document.getElementById('rightside').style.width=(vDiv.clientWidth - vNameWidth)+'px';
+						} catch(e) {}
+					}
+				);
+			}
+			//
 		}
 
 	} //this.draw
@@ -1696,4 +1739,24 @@ JSGantt.benchMark = function(pItem)
    var vEndTime=new Date().getTime();
    alert(pItem + ': Elapsed time: '+((vEndTime-vBenchTime)/1000)+' seconds.');
    vBenchTime=new Date().getTime();
+}
+
+// simple event adder
+if (typeof smpAddEvent != 'function')
+{
+	function smpAddEvent(obj, onwhat, fun)
+	{
+		if (obj.addEventListener)
+		{
+			obj.addEventListener(onwhat, fun, false);
+		}
+		else if (obj.attachEvent)
+		{
+			obj.attachEvent('on'+onwhat, fun);
+		}
+		else
+		{
+			// error
+		}
+	}
 }
