@@ -110,6 +110,14 @@ JSGantt.TaskItem = function(pID, pName, pStart, pEnd, pColor, pLink, pMile, pRes
 
 	this.getID       = function(){ return vID };
 	this.getName     = function(){ return vName };
+	this.getShortName     = function(pNameWidth){
+		var vNameMaxLen = pNameWidth / 7;	// assuming one char is about 6px width
+		if (vName.length > vNameMaxLen)
+		{
+			vName = vName.substr(0,vNameMaxLen-2) + '...';
+		}
+		return vName
+	};
 	this.getStart    = function(){ return vStart};
 	this.getEnd      = function(){ return vEnd  };
 	this.getColor    = function(){ return vColor};
@@ -627,11 +635,11 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				if (vTaskList[i].getLink().length>0)
 				{
 					//vLeftTable += '<span title="'+ vTaskList[i].getName() +'" onclick=JSGantt.taskLink("' + vTaskList[i].getLink() + '",300,200); style="cursor:pointer"> ' + vTaskList[i].getName() + '</span></NOBR></TD>' ;
-					vLeftTable += ' <span title="'+ vTaskList[i].getName() +'" class="linked_task"><a onclick="JSGantt.taskLink(\'' + vTaskList[i].getLink() + '\',700,600); return false;" href="'+ vTaskList[i].getLink() +'" target="_blank">' + vTaskList[i].getName() + '</a></span></nobr></td>' ;
+					vLeftTable += ' <span title="'+ vTaskList[i].getName() +'" class="linked_task"><a onclick="JSGantt.taskLink(\'' + vTaskList[i].getLink() + '\',700,600); return false;" href="'+ vTaskList[i].getLink() +'" target="_blank">' + vTaskList[i].getShortName(pNameWidth) + '</a></span></nobr></td>' ;
 				}
 				else
 				{
-					vLeftTable += ' <span title="'+ vTaskList[i].getName() +'">' + vTaskList[i].getName() + '</span></nobr></td>' ;
+					vLeftTable += ' <span title="'+ vTaskList[i].getName() +'">' + vTaskList[i].getShortName(pNameWidth) + '</span></nobr></td>' ;
 				}
 
 				if(vShowRes ==1) vLeftTable += '  <td class="gtaskdesc"><nobr>' + vTaskList[i].getResource() + '</nobr></td>' ;

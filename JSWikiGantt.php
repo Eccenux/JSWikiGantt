@@ -31,7 +31,7 @@ if( !defined( 'MEDIAWIKI' ) ) {
 $wgExtensionCredits['parserhook'][] = array(
 	'path'           => __FILE__,
 	'name'           => 'JSWikiGantt',
-	'version'        => '0.5.3',
+	'version'        => '0.5.4',
 	'author'         => 'Maciej Jaros and others (see description)', 
 	'url'            => 'http://www.mediawiki.org/wiki/Extension:JSWikiGantt',
 	'descriptionmsg' => 'jswikigantt-desc',	// in i18n
