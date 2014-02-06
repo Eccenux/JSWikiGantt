@@ -601,7 +601,7 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				var isDuplicateTaskToBeMovedUp = false;
 				if (vLeftTable.indexOf(' id=child_' + vID + ' ')==-1)	// to allow more bars on one row
 				{
-					vLeftTable += '<tr id=child_' + vID + ' bgcolor="#' + vBGColor + '" ' + (vTaskList[i].getVisible()==0 ? 'style="display:none"' : '') + ' onmouseover="oJSGant.mouseOver(this,' + vID + ',"left","' + vRowType + '")" onmouseout="oJSGant.mouseOut(this,' + vID + ',"left","' + vRowType + '")">' ;
+					vLeftTable += '<tr id=child_' + vID + ' bgcolor="#' + vBGColor + '" ' + (vTaskList[i].getVisible()==0 ? 'style="display:none"' : '') + ' onmouseover="oJSGant.mouseOver(this,' + vID + ',\'left\',\'' + vRowType + '\')" onmouseout="oJSGant.mouseOut(this,' + vID + ',\'left\',\'' + vRowType + '\')">' ;
 				}
 				else
 				{
@@ -999,7 +999,7 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				if( vTaskList[i].getMile())
 				{
 					vRightTable += '<div><table style="position:relative; top:0px; width: ' + vChartWidth + 'px;">' +
-						'<tr id=childrow_' + vID + ' class=yesdisplay onmouseover="oJSGant.mouseOver(this,' + vID + ',\'right\',\'mile\')" onmouseout="oJSGant.mouseOut(this,' + vID + ',\'right\',\'mile\')>"' + vItemRowStr + '</TR></TABLE></DIV>';
+						'<tr id=childrow_' + vID + ' class=yesdisplay onmouseover="oJSGant.mouseOver(this,' + vID + ',\'right\',\'mile\')" onmouseout="oJSGant.mouseOut(this,' + vID + ',\'right\',\'mile\')">' + vItemRowStr + '</tr></table></div>';
 
 					// Build date string for Title
 					vDateRowStr = JSGantt.formatDateStr(vTaskStart,vDateDisplayFormat);
@@ -1008,8 +1008,8 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 					vTaskRight = 1
 
 					vRightTable +=
-						'<div id=bardiv_' + vID + ' style="position:absolute; top:0px; left:' + Math.ceil((vTaskLeft * (vDayWidth) + 1)) + 'px; height: 18px; width:160px; overflow:hidden;">' +
-						'  <div id=taskbar_' + vID + ' title="' + vTaskList[i].getName() + ': ' + vDateRowStr + '" style="height: 16px; width:12px; overflow:hidden; cursor: pointer;" onclick=JSGantt.taskLink("' + vTaskList[i].getLink() + '",300,200);>';
+						'<div id=bardiv_' + vID + ' style="position:absolute; top:0px; left:' + Math.ceil((vTaskLeft * (vDayWidth) - 2)) + 'px; height: 18px; width:15px; overflow:hidden;">' +
+						'  <div id=taskbar_' + vID + ' title="' + vTaskList[i].getName() + ': ' + vDateRowStr + '" style="position:relative;left:3px; height: 16px; width:12px; overflow:hidden; cursor: pointer;" onclick=JSGantt.taskLink("' + vTaskList[i].getLink() + '",300,200);>';
 
 					if(vTaskList[i].getCompVal() < 100)
 						vRightTable += '&loz;</div>' ;
@@ -1064,7 +1064,7 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 					if( vTaskList[i].getGroup())
 					{
 						vRightTable += '<DIV><TABLE style="position:relative; top:0px; width: ' + vChartWidth + 'px;">' +
-							'<TR id=childrow_' + vID + ' class=yesdisplay bgColor=#f3f3f3 onMouseover=oJSGant.mouseOver(this,' + vID + ',"right","group") onMouseout=oJSGant.mouseOut(this,' + vID + ',"right","group")>' + vItemRowStr + '</TR></TABLE></DIV>';
+							'<TR id=childrow_' + vID + ' class=yesdisplay bgColor=#f3f3f3 onMouseover="oJSGant.mouseOver(this,' + vID + ',\'right\',\'group\')" onMouseout="oJSGant.mouseOut(this,' + vID + ',\'right\',\'group\')">' + vItemRowStr + '</TR></TABLE></DIV>';
 						vRightTable +=
 							'<div id=bardiv_' + vID + ' style="position:absolute; top:5px; left:' + Math.ceil(vTaskLeft * (vDayWidth) + 1) + 'px; height: 7px; width:' + Math.ceil((vTaskRight) * (vDayWidth) - 1) + 'px">' +
 								'<div id=taskbar_' + vID + ' title="' + vTaskList[i].getName() + ': ' + vDateRowStr + '" class=gtask style="background-color:#000000; height: 7px; width:' + Math.ceil((vTaskRight) * (vDayWidth) -1) + 'px;  cursor: pointer;opacity:0.9;">' +
@@ -1104,7 +1104,7 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 						if (!isDuplicateTaskToBeMovedUp)
 						{
 							vDivStr = '<DIV><TABLE style="position:relative; top:0px; width: ' + vChartWidth + 'px;">' +
-								'<TR id=childrow_' + vID + ' class=yesdisplay bgColor=#ffffff onMouseover=oJSGant.mouseOver(this,' + vID + ',"right","row") onMouseout=oJSGant.mouseOut(this,' + vID + ',"right","row")>' + vItemRowStr + '</TR></TABLE></DIV>';
+								'<TR id=childrow_' + vID + ' class=yesdisplay bgColor=#ffffff onMouseover="oJSGant.mouseOver(this,' + vID + ',\'right\',\'row\')" onMouseout="oJSGant.mouseOut(this,' + vID + ',\'right\',\'row\')">' + vItemRowStr + '</TR></TABLE></DIV>';
 							vRightTable += vDivStr;
 						}
 						
