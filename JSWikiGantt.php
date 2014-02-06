@@ -5,14 +5,13 @@
 	* Xaprb JavaScript date formatting by Baron Schwartz
  
 	To activate this extension, add the following into your LocalSettings.php file:
-	require_once('$IP/extensions/JSWikiGantt/JSWikiGantt.php');
+	require_once("$IP/extensions/JSWikiGantt/JSWikiGantt.php");
 	
 	Note!
 		PHP 5.1 or higher is required for this extension (needed for the XML/DOM functions and some class specifc stuff).
 	
 	@ingroup Extensions
 	@author Maciej Jaros <egil@wp.pl> and others (see description)
-	@version 0.0.1
 	@link http://www.mediawiki.org/wiki/Extension:JSWikiGantt
 	@license http://www.gnu.org/copyleft/gpl.html GNU General Public License 2.0 or later
 */
@@ -32,7 +31,7 @@ if( !defined( 'MEDIAWIKI' ) ) {
 $wgExtensionCredits['parserhook'][] = array(
 	'path'         => __FILE__,
 	'name'         => 'JSWikiGantt',
-	'version'      => '0.1.0',
+	'version'      => '0.2.0',
 	'author'       => 'Maciej Jaros and others (see description)', 
 	'url'          => 'http://www.mediawiki.org/wiki/Extension:JSWikiGantt',
 	'description'  => ''

@@ -16,7 +16,7 @@ $wgJSGanttConfig = array(
 );
 
 // change this to bypass cash and in effect refresh CSS and JS
-$wgJSGanttScriptVersion = "3";
+$wgJSGanttScriptVersion = "1";
 
 // marker - this should not be changed unless there is a clash whith other extenesions
 $wgJSGanttInlineOutputMarker = '<!--##GanttChartInlineOutput##-->';
