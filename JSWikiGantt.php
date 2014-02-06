@@ -31,7 +31,7 @@ if( !defined( 'MEDIAWIKI' ) ) {
 $wgExtensionCredits['parserhook'][] = array(
 	'path'         => __FILE__,
 	'name'         => 'JSWikiGantt',
-	'version'      => '0.4.0',
+	'version'      => '0.5.0',
 	'author'       => 'Maciej Jaros and others (see description)', 
 	'url'          => 'http://www.mediawiki.org/wiki/Extension:JSWikiGantt',
 	/*
@@ -41,18 +41,17 @@ $wgExtensionCredits['parserhook'][] = array(
 		.' See jsgantt.js and date-functions.js for licensing details of this modules.'
 	*/
 	'descriptionmsg' => 'jswikigantt-desc',
-
 );
 
 //
 // Absolute path
 //
-$wgJSGanttDir = rtrim(dirname(__FILE__), "/\ ");
+$wgJSGanttDir = rtrim( dirname( __FILE__ ), "/\ " );
 
 //
 // Configuration file
 //
-require_once ("{$wgJSGanttDir}/JSWikiGantt.config.php");
+require_once ( "{$wgJSGanttDir}/JSWikiGantt.config.php" );
 
 //
 // Class setup
@@ -64,8 +63,7 @@ $wgExtensionMessagesFiles['JSWikiGantt'] = "{$wgJSGanttDir}/JSWikiGantt.i18n.php
 // add hook setup and init class/object
 //
 $wgHooks['ParserFirstCallInit'][] = 'efJSGanttSetup';
-function efJSGanttSetup( &$parser )
-{
+function efJSGanttSetup( &$parser ) {
 	// other hooks are added upon construct
 	new ecJSGantt;
 	
