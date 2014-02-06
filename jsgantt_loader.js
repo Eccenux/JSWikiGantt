@@ -1,28 +1,59 @@
-﻿// global gant object (needed for jsgantt)
+﻿//
+// Global gant object (needed for jsgantt)
+//
 var oJSGant;
 
-// global gant loader object
+//
+// Global gant loader object
+//
 var oJSGantLoader = {
 	conf : {
 		elGantDivID : 'GanttChartDIV',	// gant element (a link should be added to it)
 		intNamesWidth : 300,			// names width
+		strDefaultViewFormat : 'day',		// ("day","week","month","quarter")
+		strDateInputFormat : 'Y-m-d',		// date format of the input
 		strDateDisplayFormat : 'Y-m-d',		// basic date format
-		/*
-		strDateDisplayFormat : 'Y-m-d',		// headers date formats
-		
-		}
-		*/
+		oDateDisplayFormatCaptions : {		// headers date formats
+			'day' : {
+				'from' : 'd.m',
+				'to' : ' - d.m.y'
+			},
+			'week' : {
+				'upper' : 'Y',
+				'lower' : 'm/d'
+			},
+			'month' : {
+				'upper' : 'Y',
+				'lower' : 'M'
+			},
+			'quarter' : {
+				'upper' : 'Y',
+				'lower' : '"Kw." q'
+			}
+		},
+		'':''
+	},
+	lang : {
+		'No XML Link Error' : 'Błąd! Brak linku do artkułu zawierającego dane haromonogramu. W elemencie z id "%el_id%" należy podać link do artykułu z danymi w formacie XML.',
+		'Unexpected Error' : 'Niespodziewany błąd!',
 		'':''
 	}
-	/*
-	FIXME
-	lang : {
-		months : 
-	}
-	*/
 };
 
+//
+// Standard error handling
+//
+oJSGantLoader.displayError = function(strMsg)
+{
+	var nel = document.createElement('p');
+	nel.className = "gantt_error";
+	nel.appendChild(document.createTextNode(strMsg));
+	this.elGantDiv.appendChild(nel);
+}
+
+//
 // Init gantt
+//
 oJSGantLoader.load = function()
 {
 	var elGantDiv = document.getElementById(this.conf.elGantDivID);
@@ -30,6 +61,7 @@ oJSGantLoader.load = function()
 	{
 		return;
 	}
+	this.elGantDiv = elGantDiv;
 	
 	var strXmlUrl = '';
 	try
@@ -40,25 +72,15 @@ oJSGantLoader.load = function()
 	}
 	catch(e)
 	{
-		var strError = 'Dodaj link do artkułu zawierającego dane XML w elemencie z id "'+elGantDivID+'"';
-		elGantDiv.appendChild(document.createTextNode(strError));
+		this.displayError(this.lang['No XML Link Error'].replace('%el_id%', this.conf.elGantDivID));
 		return;
 	}
 
-	oJSGant = new JSGantt.GanttChart('oJSGant', elGantDiv, 'day');
-	/*
-	oJSGant.setDateInputFormat ('yyyy-mm-dd');
-	oJSGant.setDateDisplayFormat ('yyyy-mm-dd');
-	*/
-	/*
-	// defaults
-	var vDateInputFormat = "mm/dd/yyyy";
-	var vDateDisplayFormat = "mm/dd/yy";
-	var vFormatArr	= new Array("day","week","month","quarter");
-	var vMonthArr     = new Array("January","February","March","April","May","June","July","August","September","October","November","December");
-	*/
-	oJSGant.setMonthArr("Styczeń","Luty","Marzec","Kwiecień","Maj","Czerwiec","Lipiec","Sierpień","Wrzesień","Październik","Listopad","Grudzień");
+	// setup
+	oJSGant = new JSGantt.GanttChart('oJSGant', elGantDiv, this.conf.strDefaultViewFormat);
+	oJSGant.setDateInputFormat (this.conf.strDateInputFormat);
 	oJSGant.setDateDisplayFormat (this.conf.strDateDisplayFormat);
+	oJSGant.setDateDisplayFormatCaptions (this.conf.oDateDisplayFormatCaptions);
 	
 	oJSGant.setShowRes(0); // Show/Hide Responsible (0/1)
 	oJSGant.setShowDur(0); // Show/Hide Duration (0/1)
@@ -77,13 +99,12 @@ oJSGantLoader.load = function()
 	}
 	else
 	{
-		var strError = 'Niespodziewany błąd!';
-		elGantDiv.appendChild(document.createTextNode(strError));
+		this.displayError(this.lang['Unexpected Error']);
 	}
 }
 
 
 //
-// Loader
+// Loader init
 //
 addOnloadHook(function() {oJSGantLoader.load()});

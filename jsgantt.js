@@ -191,33 +191,25 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 	var vShowComp = 1;
 	var vShowStartDate = 1;
 	var vShowEndDate = 1;
-	/*
-	var vDateInputFormat = "mm/dd/yyyy";
-	var vDateDisplayFormat = "mm/dd/yy";
-	*/
 	var vDateInputFormat = "m/d/Y";
 	var vDateDisplayFormat = "m/d/y";
 	// date format in formats captions
 	var vDateDisplayFormatCaptions = {
 		'day' : {
-			/*
 			'from' : 'm/d - ',
 			'to' : 'm/d/y'
-			*/
-			'from' : 'M Y (d-',
-			'to' : 'd)'
 		},
 		'week' : {
 			'upper' : 'Y',
-			'lower' : '[m/d'
+			'lower' : 'm/d'
 		},
 		'month' : {
 			'upper' : 'Y',
 			'lower' : 'M'
 		},
 		'quarter' : {
-			'upper' : 'Y'
-			//'lower' : '"Qtr." Q'	// FIXME
+			'upper' : 'Y',
+			'lower' : '"Qtr." q'
 		}
 	};
 	
@@ -226,27 +218,21 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 	var vDepId = 1;
 	var vTaskList     = new Array();	
 	var vFormatArr	= new Array("day","week","month","quarter");	// formats to display
-	var vQuarterArr   = new Array(1,1,1,2,2,2,3,3,3,4,4,4);
 	var vMonthDaysArr = new Array(31,28,31,30,31,30,31,31,30,31,30,31);
-	var vMonthArr     = new Array("January","February","March","April","May","June","July","August","September","October","November","December");
 	this.setFormatArr = function()
 	{
 		vFormatArr = new Array();
 		for(var i = 0; i < arguments.length; i++) {vFormatArr[i] = arguments[i];}
 		if(vFormatArr.length>4){vFormatArr.length=4;}
 	};
-	this.setMonthArr = function()
-	{
-		vMonthArr = new Array();
-		for(var i = 0; i < arguments.length; i++) {vMonthArr[i] = arguments[i];}
-	};
-	this.setShowRes  = function(pShow) { vShowRes  = pShow; };
-	this.setShowDur  = function(pShow) { vShowDur  = pShow; };
-	this.setShowComp = function(pShow) { vShowComp = pShow; };
-	this.setShowStartDate = function(pShow) { vShowStartDate = pShow; };
-	this.setShowEndDate = function(pShow) { vShowEndDate = pShow; };
-	this.setDateInputFormat = function(pShow) { vDateInputFormat = pShow; };
-	this.setDateDisplayFormat = function(pShow) { vDateDisplayFormat = pShow; };
+	this.setShowRes  = function(val) { vShowRes  = val; };
+	this.setShowDur  = function(val) { vShowDur  = val; };
+	this.setShowComp = function(val) { vShowComp = val; };
+	this.setShowStartDate = function(val) { vShowStartDate = val; };
+	this.setShowEndDate = function(val) { vShowEndDate = val; };
+	this.setDateInputFormat = function(val) { vDateInputFormat = val; };
+	this.setDateDisplayFormat = function(val) { vDateDisplayFormat = val; };
+	this.setDateDisplayFormatCaptions = function(val) { vDateDisplayFormatCaptions = val; };
 	this.setCaptionType = function(pType) { vCaptionType = pType };
 	this.setFormat = function(pFormat)
 	{
@@ -693,25 +679,25 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				if(vFormat == 'day')
 				{
 					vRightTable += '<td class=gdatehead style="FONT-SIZE: 12px; HEIGHT: 19px;" align=center colspan=7>'
-						+ JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions.day.from)
+						+ JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions[vFormat].from)
 						//+ JSGantt.formatDateStr(vTmpDate,vDateDisplayFormat.substring(0,5)) + ' - '
 						//+ "FIXME" + ' - '
 					;
 					vTmpDate.setDate(vTmpDate.getDate()+6);
-					vRightTable += JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions.day.to) + '</td>';
+					vRightTable += JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions[vFormat].to) + '</td>';
 					vTmpDate.setDate(vTmpDate.getDate()+1);
 				}
 				else if(vFormat == 'week')
 				{
 					//vRightTable += '<td class=gdatehead align=center style="FONT-SIZE: 12px; HEIGHT: 19px;" width='+vColWidth+'px>`'+ vStr + '</td>';
-					vRightTable += '<td class=gdatehead align=center style="FONT-SIZE: 12px; HEIGHT: 19px;" width='+vColWidth+'px>'+ 
+					vRightTable += '<td class=gdatehead align=center style="FONT-SIZE: 12px; HEIGHT: 19px;" width='+vColWidth+'px>'
 						+ JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions[vFormat].upper)
 						+ '</td>';
 					vTmpDate.setDate(vTmpDate.getDate()+7);
 				}
 				else if(vFormat == 'month')
 				{
-					vRightTable += '<td class=gdatehead align=center style="FONT-SIZE: 12px; HEIGHT: 19px;" width='+vColWidth+'px>'+ 
+					vRightTable += '<td class=gdatehead align=center style="FONT-SIZE: 12px; HEIGHT: 19px;" width='+vColWidth+'px>' 
 						+ JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions[vFormat].upper)
 						+ '</td>';
 					vTmpDate.setDate(vTmpDate.getDate() + 1);
@@ -722,7 +708,7 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				}
 				else if(vFormat == 'quarter')
 				{
-					vRightTable += '<td class=gdatehead align=center style="FONT-SIZE: 12px; HEIGHT: 19px;" width='+vColWidth+'px>'+ 
+					vRightTable += '<td class=gdatehead align=center style="FONT-SIZE: 12px; HEIGHT: 19px;" width='+vColWidth+'px>'
 						+ JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions[vFormat].upper)
 						+ '</td>';
 					vTmpDate.setDate(vTmpDate.getDate() + 81);
@@ -813,7 +799,9 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 
 					if(vNxtDate <= vMaxDate) 
 					{
-						vDateRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; HEIGHT: 19px; BORDER-LEFT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center width:'+vColWidth+'px><div style="width: '+vColWidth+'px">' + (vTmpDate.getMonth()+1) + '/' + vTmpDate.getDate() + '</div></td>';
+						vDateRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; HEIGHT: 19px; BORDER-LEFT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center width:'+vColWidth+'px>'
+							+'<div style="width: '+vColWidth+'px">' + JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions[vFormat].lower) + '</div></td>'
+						;
 						if( vCurrDate >= vTmpDate && vCurrDate < vNxtDate ) 
 							vItemRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center><div style="width: '+vColWidth+'px">&nbsp&nbsp</div></td>';
 						else
@@ -822,7 +810,8 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 					}
 					else
 					{
-						vDateRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; HEIGHT: 19px; BORDER-LEFT: #efefef 1px solid; bgcolor=#' + vWeekdayColor + ' BORDER-RIGHT: #efefef 1px solid;" align=center width:'+vColWidth+'px><div style="width: '+vColWidth+'px">' + (vTmpDate.getMonth()+1) + '/' + vTmpDate.getDate() + '</div></td>';
+						vDateRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; HEIGHT: 19px; BORDER-LEFT: #efefef 1px solid; bgcolor=#' + vWeekdayColor + ' BORDER-RIGHT: #efefef 1px solid;" align=center width:'+vColWidth+'px>'
+							+'<div style="width: '+vColWidth+'px">' + JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions[vFormat].lower) + '</div></td>';
 						if( vCurrDate >= vTmpDate && vCurrDate < vNxtDate ) 
 							vItemRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid; BORDER-RIGHT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center><div style="width: '+vColWidth+'px">&nbsp&nbsp</div></td>';
 						else
@@ -843,7 +832,8 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 
 					if(vNxtDate <= vMaxDate)
 					{
-						vDateRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; HEIGHT: 19px; BORDER-LEFT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center width:'+vColWidth+'px><div style="width: '+vColWidth+'px">' + vMonthArr[vTmpDate.getMonth()].substr(0,3) + '</div></td>';
+						vDateRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; HEIGHT: 19px; BORDER-LEFT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center width:'+vColWidth+'px><div style="width: '+vColWidth+'px">' 
+							+ JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions[vFormat].lower)  + '</div></td>';
 						if( vCurrDate >= vTmpDate && vCurrDate < vNxtDate ) 
 							vItemRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center><div style="width: '+vColWidth+'px">&nbsp&nbsp</div></td>';
 						else
@@ -851,7 +841,8 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 					}
 					else
 					{
-						vDateRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; HEIGHT: 19px; BORDER-LEFT: #efefef 1px solid; BORDER-RIGHT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center width:'+vColWidth+'px><div style="width: '+vColWidth+'px">' + vMonthArr[vTmpDate.getMonth()].substr(0,3) + '</div></td>';
+						vDateRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; HEIGHT: 19px; BORDER-LEFT: #efefef 1px solid; BORDER-RIGHT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center width:'+vColWidth+'px><div style="width: '+vColWidth+'px">' + 
+							JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions[vFormat].lower) + '</div></td>';
 						if( vCurrDate >= vTmpDate && vCurrDate < vNxtDate ) 
 							vItemRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid; BORDER-RIGHT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center><div style="width: '+vColWidth+'px">&nbsp&nbsp</div></td>';
 						else
@@ -886,7 +877,8 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 
 					if(vNxtDate <= vMaxDate) 
 					{
-						vDateRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; HEIGHT: 19px; BORDER-LEFT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center width:'+vColWidth+'px><div style="width: '+vColWidth+'px">Kw. ' + vQuarterArr[vTmpDate.getMonth()] + '</div></td>';
+						vDateRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; HEIGHT: 19px; BORDER-LEFT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center width:'+vColWidth+'px>'
+							+'<div style="width: '+vColWidth+'px">' + JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions[vFormat].lower)  + '</div></td>';
 						if( vCurrDate >= vTmpDate && vCurrDate < vNxtDate ) 
 							vItemRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center><div style="width: '+vColWidth+'px">&nbsp&nbsp</div></td>';
 						else
@@ -894,7 +886,8 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 					}
 					else
 					{
-						vDateRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; HEIGHT: 19px; BORDER-LEFT: #efefef 1px solid; BORDER-RIGHT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center width:'+vColWidth+'px><div style="width: '+vColWidth+'px">Qtr. ' + vQuarterArr[vTmpDate.getMonth()] + '</div></td>';
+						vDateRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; HEIGHT: 19px; BORDER-LEFT: #efefef 1px solid; BORDER-RIGHT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center width:'+vColWidth+'px>'
+							+'<div style="width: '+vColWidth+'px">' + JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions[vFormat].lower)  + '</div></td>';
 						if( vCurrDate >= vTmpDate && vCurrDate < vNxtDate ) 
 							vItemRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid; BORDER-RIGHT: #efefef 1px solid;" bgcolor=#' + vWeekdayColor + ' align=center><div style="width: '+vColWidth+'px">&nbsp&nbsp</div></td>';
 						else 
@@ -1501,64 +1494,14 @@ JSGantt.taskLink = function(pRef,pWidth,pHeight)
 
 JSGantt.parseDateStr = function(pDateStr,pFormatStr)
 {
-	/**
-	var vDate =new Date();
-	vDate.setTime( Date.parse(pDateStr));
-
-	switch(pFormatStr) 
-	{
-		case 'mm/dd/yyyy':
-			var vDateParts = pDateStr.split('/');
-			vDate.setFullYear(parseInt(vDateParts[2], 10), parseInt(vDateParts[0], 10) - 1, parseInt(vDateParts[1], 10));
-			break;
-		case 'dd/mm/yyyy':
-			var vDateParts = pDateStr.split('/');
-			vDate.setFullYear(parseInt(vDateParts[2], 10), parseInt(vDateParts[1], 10) - 1, parseInt(vDateParts[0], 10));
-			break;
-		case 'yyyy-mm-dd':
-			var vDateParts = pDateStr.split('-');
-			vDate.setFullYear(parseInt(vDateParts[0], 10), parseInt(vDateParts[1], 10) - 1, parseInt(vDateParts[1], 10));
-			break;
-	}
-
-	return(vDate);
-	/**/
 	var vDate = Date.parseDate(pDateStr, pFormatStr);
 	return(vDate);
-	/**/
 }
 
 JSGantt.formatDateStr = function(pDate,pFormatStr)
 {
-	/**
-	vYear4Str = pDate.getFullYear() + '';
-	vYear2Str = vYear4Str.substring(2,4);
-	vMonthStr = (pDate.getMonth()+1) + '';
-	vDayStr   = pDate.getDate() + '';
-
-	var vDateStr = "";	
-
-	switch(pFormatStr)
-	{
-		case 'mm/dd/yyyy':
-			return( vMonthStr + '/' + vDayStr + '/' + vYear4Str );
-		case 'dd/mm/yyyy':
-			return( vDayStr + '/' + vMonthStr + '/' + vYear4Str );
-		case 'yyyy-mm-dd':
-			return( vYear4Str + '-' + vMonthStr + '-' + vDayStr );
-		case 'mm/dd/yy':
-			return( vMonthStr + '/' + vDayStr + '/' + vYear2Str );
-		case 'dd/mm/yy':
-			return( vDayStr + '/' + vMonthStr + '/' + vYear2Str );
-		case 'yy-mm-dd':
-			return( vYear2Str + '-' + vMonthStr + '-' + vDayStr );
-		case 'mm/dd':
-			return( vMonthStr + '/' + vDayStr );
-		case 'dd/mm':
-			return( vDayStr + '/' + vMonthStr );
-	}
-	/**/
-	return(pDate.dateFormat(pFormatStr));
+	var vDateStr = pDate.dateFormat(pFormatStr);
+	return(vDateStr);
 }
 
 JSGantt.parseXML = function(ThisFile,pGanttVar)

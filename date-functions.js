@@ -46,9 +46,21 @@ Date.createNewFormat = function(format) {
     var ch = '';
     for (var i = 0; i < format.length; ++i) {
         ch = format.charAt(i);
+		// escape character start
         if (!special && ch == "\\") {
             special = true;
         }
+		// escaped string
+        else if (!special && ch == '"') {
+			var end = format.indexOf('"', i+1);
+			if (end==-1)
+			{
+				end = format.length;
+			}
+            code += "'" + String.escape(format.substring(i+1, end)) + "' + ";
+			i = end;
+        }
+		// escaped character
         else if (special) {
             special = false;
             code += "'" + String.escape(ch) + "' + ";
@@ -118,6 +130,8 @@ Date.getFormatCode = function(character) {
         return "this.getTimezone() + ";
     case "Z":
         return "(this.getTimezoneOffset() * -60) + ";
+    case "q":	// quarter num, Q for name?
+        return "this.getQuarter() + ";
     default:
         return "'" + String.escape(character) + "' + ";
     }
@@ -370,6 +384,9 @@ Date.prototype.getDaysInMonth = function() {
     Date.daysInMonth[1] = this.isLeapYear() ? 29 : 28;
     return Date.daysInMonth[this.getMonth()];
 };
+Date.prototype.getQuarter = function() {
+    return Date.quarterFromMonthNum[this.getMonth()];
+};
 
 Date.prototype.getSuffix = function() {
     switch (this.getDate()) {
@@ -403,6 +420,7 @@ String.leftPad = function (val, size, ch) {
     return result;
 };
 
+Date.quarterFromMonthNum = [1,1,1,2,2,2,3,3,3,4,4,4];
 Date.daysInMonth = [31,28,31,30,31,30,31,31,30,31,30,31];
 /*
 Date.monthNames =

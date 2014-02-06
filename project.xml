@@ -17,8 +17,8 @@
 <task>
 	<pID>20</pID>
 	<pName>Move to WCF from remoting</pName>
-	<pStart>9/11/2010</pStart>
-	<pEnd>9/15/2010</pEnd>
+	<pStart>2010-9-11</pStart>
+	<pEnd>2010-9-15</pEnd>
 	<pColor>0000ff</pColor>
 	<pLink></pLink>
 	<pMile>0</pMile>
@@ -33,8 +33,8 @@
 <task>
 	<pID>30</pID>
 	<pName>add Auditing</pName>
-	<pStart>9/19/2010</pStart>
-	<pEnd>9/21/2010</pEnd>
+	<pStart>2010-9-19</pStart>
+	<pEnd>2010-9-21</pEnd>
 	<pColor>0000ff</pColor>
 	<pLink></pLink>
 	<pMile>0</pMile>
@@ -49,8 +49,8 @@
 <task>
 	<pID>40</pID>
 	<pName>Yet another task</pName>
-	<pStart>9/23/2010</pStart>
-	<pEnd>9/24/2010</pEnd>
+	<pStart>2010-9-23</pStart>
+	<pEnd>2010-9-24</pEnd>
 	<pColor>0000ff</pColor>
 	<pLink></pLink>
 	<pMile>0</pMile>
@@ -78,8 +78,8 @@
 <task>
 	<pID>22</pID>
 	<pName>Testing</pName>
-	<pStart>9/11/2010</pStart>
-	<pEnd>9/15/2010</pEnd>
+	<pStart>2010-9-11</pStart>
+	<pEnd>2010-9-15</pEnd>
 	<pLink></pLink>
 	<pRes>Richi</pRes>
 	<pParent>21</pParent>
@@ -89,8 +89,8 @@
 <task>
 	<pID>23</pID>
 	<pName>Testing</pName>
-	<pStart>8/25/2010</pStart>
-	<pEnd>9/1/2010</pEnd>
+	<pStart>2010-8-25</pStart>
+	<pEnd>2010-9-1</pEnd>
 	<pLink></pLink>
 	<pRes>Richi</pRes>
 	<pParent>21</pParent>
