@@ -29,18 +29,12 @@ if( !defined( 'MEDIAWIKI' ) ) {
 // Extension credits that will show up on Special:Version
 //
 $wgExtensionCredits['parserhook'][] = array(
-	'path'         => __FILE__,
-	'name'         => 'JSWikiGantt',
-	'version'      => '0.5.0',
-	'author'       => 'Maciej Jaros and others (see description)', 
-	'url'          => 'http://www.mediawiki.org/wiki/Extension:JSWikiGantt',
-	/*
-	'description'  => ''
-		." This extension adds a ''jsgantt'' tag in which you can define a Gantt diagram data to be drawn. Currently only one diagram per page."
-		.' Note! This extension is based on JSGantt project started by Shlomy Gantz and Xaprb JavaScript date formatting by Baron Schwartz.'
-		.' See jsgantt.js and date-functions.js for licensing details of this modules.'
-	*/
-	'descriptionmsg' => 'jswikigantt-desc',
+	'path'           => __FILE__,
+	'name'           => 'JSWikiGantt',
+	'version'        => '0.5.1',
+	'author'         => 'Maciej Jaros and others (see description)', 
+	'url'            => 'http://www.mediawiki.org/wiki/Extension:JSWikiGantt',
+	'descriptionmsg' => 'jswikigantt-desc',	// in i18n
 );
 
 //

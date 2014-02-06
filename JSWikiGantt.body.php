@@ -1,10 +1,13 @@
 <?php
-
+/**
+	Main JSWikiGantt extension class
+*/
 class ecJSGantt {
-	var $strInlineOutputMarker;		// marker for the inline output of scripts (=$wgJSGanttInlineOutputMarker)
-	var $strSelfDir;				// this extension directory
-	var $strJSi18nFile = 'jsgantt_i18n_%lang%.js';
-	
+	var $strInlineOutputMarker;                    //<! marker for the inline output of scripts (=$wgJSGanttInlineOutputMarker)
+	var $strSelfURLBase;                           //<! this extension base URL (virtual path)
+	var $strSelfDir;                               //<! this extension directory (physical path)
+	var $strJSi18nFile = 'jsgantt_i18n_%lang%.js'; //<! js lang file save path (cache)
+	                                               //<! @note should be this extension based
 	var $isInline = false;
 	var $isExternal = false;
 	
@@ -12,7 +15,8 @@ class ecJSGantt {
 		Basic setup
 	*/
 	function __construct() {
-		global $wgJSGanttConfig, $wgParser, $wgHooks, $wgScriptPath, $wgJSGanttInlineOutputMarker, $wgParserOutputHooks, $wgLang;
+		global $wgParser, $wgHooks, $wgScriptPath, $wgParserOutputHooks, $wgLang
+			, $wgJSGanttConfig, $wgJSGanttInlineOutputMarker, $wgJSGanttDir;
 		
 		// hook <jsgantt> tag for this extension
 		$wgParser->setHook( 'jsgantt', array( $this, 'render' ) );
@@ -27,7 +31,8 @@ class ecJSGantt {
 		$this->strInlineOutput = '';
 		$this->config = $wgJSGanttConfig;
 		$this->strInlineOutputMarker = $wgJSGanttInlineOutputMarker;
-		$this->strSelfDir = "{$wgScriptPath}/extensions/JSWikiGantt";
+		$this->strSelfURLBase = "{$wgScriptPath}/extensions/JSWikiGantt";
+		$this->strSelfDir = $wgJSGanttDir;
 		
 		$this->strJSi18nFile = str_replace( '%lang%', $wgLang->getCode(), $this->strJSi18nFile );
 	}
@@ -40,7 +45,7 @@ class ecJSGantt {
 		@param $parser - not needed
 		@param $frame - not needed
 	*/
-	function render ( $input, $args, $parser, $frame ) {
+	function render( $input, $args, $parser, $frame ) {
 		$strRendered = '';
 		
 		// load from some other article
@@ -66,8 +71,10 @@ class ecJSGantt {
 
 	/**
 		Render our tag for the purpouse of loading an external XML
+		
+		@sa ecJSGantt::render()
 	*/
-	function renderXMLLoader ( $input, $args, $parser, $frame ) {
+	function renderXMLLoader( $input, $args, $parser, $frame ) {
 		//$out = $parser->recursiveTagParse( $input, $frame );
 		$out = $parser->replaceInternalLinks( $input, $frame );	// just parse links
 		return ''
@@ -81,7 +88,7 @@ class ecJSGantt {
 	/**
 		Escapes XML string from user for JS
 	*/
-	function escapeXMLString4JS ( $value ) {
+	function escapeXMLString4JS( $value ) {
 		// quite simple for now - might want to allow html inside tags...
 		return htmlspecialchars( $value );
 	}
@@ -91,7 +98,7 @@ class ecJSGantt {
 		
 		@todo get content of the tag given by valName or an attribute with the same name
 	*/
-	function getXMLIntVal ( $task, $valName, $defaultVal ) {
+	function getXMLIntVal( $task, $valName, $defaultVal ) {
 		// quite simple for now - might want to allow html inside tags...
 		$val = intval( @$task->getElementsByTagName( $valName )->item( 0 )->nodeValue );
 		if( empty( $val ) ) {
@@ -104,7 +111,7 @@ class ecJSGantt {
 		
 		@todo get content of the tag given by valName or an attribute with the same name
 	*/
-	function getXMLStrVal ( $task, $valName, $defaultVal ) {
+	function getXMLStrVal( $task, $valName, $defaultVal ) {
 		// quite simple for now - might want to allow html inside tags...
 		$val = $this->escapeXMLString4JS( @$task->getElementsByTagName( $valName )->item( 0 )->nodeValue );
 		if( empty( $val ) ) {
@@ -115,8 +122,10 @@ class ecJSGantt {
 
 	/**
 		Render contents of our tag to display the diagram more directly
+
+		@sa ecJSGantt::render()
 	*/
-	function renderInnerXML ( $input, $args, $parser, $frame ) {
+	function renderInnerXML( $input, $args, $parser, $frame ) {
 		global $wgJsMimeType;
 		
 		$doc = new DOMDocument();
@@ -160,18 +169,18 @@ class ecJSGantt {
 			}
 			
 			// other values
-			$pName = $this->getXMLStrVal( $tasks->item( $i ), "pName", "No Task Name" );	// TODO: Allow HTML/Wiki here?
-			$pColor = $this->getXMLStrVal( $tasks->item( $i ), "pColor", "0000ff" );
-			$pParent = $this->getXMLIntVal( $tasks->item( $i ), "pParent", 0 );
-			$pStart = $this->getXMLStrVal( $tasks->item( $i ), "pStart", "" );
-			$pEnd = $this->getXMLStrVal( $tasks->item( $i ), "pEnd", "" );
-			$pLink = $this->getXMLStrVal( $tasks->item( $i ), "pLink", "" );
-			$pMile = $this->getXMLIntVal( $tasks->item( $i ), "pMile", 0 );
-			$pRes = $this->getXMLStrVal( $tasks->item( $i ), "pRes", "" );		// resource
-			$pComp = $this->getXMLIntVal( $tasks->item( $i ), "pComp", 0 );
-			$pGroup = $this->getXMLIntVal( $tasks->item( $i ), "pGroup", 0 );
-			$pOpen = $this->getXMLIntVal( $tasks->item( $i ), "pOpen", 1 );
-			$pDepend = $this->getXMLStrVal( $tasks->item( $i ), "pDepend", '' );
+			$pName    = $this->getXMLStrVal( $tasks->item( $i ), "pName"   , "No Task Name" );	// TODO: Allow HTML/Wiki here?
+			$pColor   = $this->getXMLStrVal( $tasks->item( $i ), "pColor"  , "0000ff" );
+			$pParent  = $this->getXMLIntVal( $tasks->item( $i ), "pParent" , 0 );
+			$pStart   = $this->getXMLStrVal( $tasks->item( $i ), "pStart"  , "" );
+			$pEnd     = $this->getXMLStrVal( $tasks->item( $i ), "pEnd"    , "" );
+			$pLink    = $this->getXMLStrVal( $tasks->item( $i ), "pLink"   , "" );
+			$pMile    = $this->getXMLIntVal( $tasks->item( $i ), "pMile"   , 0 );
+			$pRes     = $this->getXMLStrVal( $tasks->item( $i ), "pRes"    , "" );		// resource
+			$pComp    = $this->getXMLIntVal( $tasks->item( $i ), "pComp"   , 0 );
+			$pGroup   = $this->getXMLIntVal( $tasks->item( $i ), "pGroup"  , 0 );
+			$pOpen    = $this->getXMLIntVal( $tasks->item( $i ), "pOpen"   , 1 );
+			$pDepend  = $this->getXMLStrVal( $tasks->item( $i ), "pDepend" , '' );
 			$pCaption = $this->getXMLStrVal( $tasks->item( $i ), "pCaption", '' );
 			
 			// Add auto link
@@ -226,23 +235,23 @@ class ecJSGantt {
 	function getJSi18nMsgs() {
 		return "
 		/* gantt core */
-		JSGantt.lang['format-label'] = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-format-label' ) )."';
-		JSGantt.lang['format-quarter'] = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-format-quarter' ) )."';
-		JSGantt.lang['format-month'] = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-format-month' ) )."';
-		JSGantt.lang['format-week'] = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-format-week' ) )."';
-		JSGantt.lang['format-day'] = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-format-day' ) )."';
-		JSGantt.lang['format-hour'] = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-format-hour' ) )."';
-		JSGantt.lang['format-minute'] = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-format-minute' ) )."';
-		JSGantt.lang['header-res'] = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-header-res' ) )."';
-		JSGantt.lang['header-dur'] = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-header-dur' ) )."';
-		JSGantt.lang['header-comp'] = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-header-comp' ) )."';
-		JSGantt.lang['header-startdate'] = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-header-startdate' ) )."';
-		JSGantt.lang['header-enddate'] = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-header-enddate' ) )."';
+		JSGantt.lang['format-label']      = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-format-label' ) )."';
+		JSGantt.lang['format-quarter']    = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-format-quarter' ) )."';
+		JSGantt.lang['format-month']      = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-format-month' ) )."';
+		JSGantt.lang['format-week']       = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-format-week' ) )."';
+		JSGantt.lang['format-day']        = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-format-day' ) )."';
+		JSGantt.lang['format-hour']       = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-format-hour' ) )."';
+		JSGantt.lang['format-minute']     = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-format-minute' ) )."';
+		JSGantt.lang['header-res']        = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-header-res' ) )."';
+		JSGantt.lang['header-dur']        = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-header-dur' ) )."';
+		JSGantt.lang['header-comp']       = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-header-comp' ) )."';
+		JSGantt.lang['header-startdate']  = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-header-startdate' ) )."';
+		JSGantt.lang['header-enddate']    = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-header-enddate' ) )."';
 		/* gantt inline/loader */
 		JSGantt.lang['no-xml-link-error'] = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-no-xml-link-error' ) )."';
 		JSGantt.lang['unexpected-error']  = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-unexpected-error' ) )."';
 		JSGantt.lang['xml-parse-error']   = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-xml-parse-error' ) )."';
-		JSGantt.lang['quarter-short'] = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-quarter-short' ) )."';
+		JSGantt.lang['quarter-short']     = '".Xml::escapeJsString( wfMsgNoTrans( 'jswikigantt-quarter-short' ) )."';
 		/* date-functions */
 		Date.monthNames =
 		   ['".Xml::escapeJsString( wfMsgNoTrans( 'january' ) )."',
@@ -290,9 +299,8 @@ class ecJSGantt {
 		@note blindly assuming that JSWikiGantt.i18n.php will change more often then other i18n files
 	*/
 	function createJSi18nFile() {
-		global $wgJSGanttDir;
-		$strOutputPath = "{$wgJSGanttDir}/{$this->strJSi18nFile}";
-		$strSrcPath = "{$wgJSGanttDir}/JSWikiGantt.i18n.php";
+		$strOutputPath = "{$this->strSelfDir}/{$this->strJSi18nFile}";
+		$strSrcPath = "{$this->strSelfDir}/JSWikiGantt.i18n.php";
 		
 		// check if we need to change anything
 		$isChanged = $this->isSrcChanged( $strSrcPath, $strOutputPath );
@@ -327,7 +335,7 @@ class ecJSGantt {
 	function getCSSJSLink( $strFileName ) {
 		global $wgJSGanttScriptVersion;
 		
-		return "{$this->strSelfDir}/{$strFileName}?{$wgJSGanttScriptVersion}";
+		return "{$this->strSelfURLBase}/{$strFileName}?{$wgJSGanttScriptVersion}";
 	}
 
 	/**
@@ -345,19 +353,19 @@ class ecJSGantt {
 		global $wgJSGanttConfig;
 		
 		if ( $outputPage->hasHeadItem( 'jsganttCSS' ) && $outputPage->hasHeadItem( 'jsganttJS' )
-			&& $outputPage->hasHeadItem( 'jsganttDateJS' ) ) {
+			&& $outputPage->hasHeadItem( 'jsganttDateJS' ) )
+		{
 			return;
 		}
 		
 		//echo "test:".$this->getCSSJSLink( "test.js" );
 		
-		$outputPage->addHeadItem( 'jsganttCSS' , Html::linkedStyle( $this->getCSSJSLink( "jsgantt.css" ) ) );
-		$outputPage->addHeadItem( 'jsganttJS' , Html::linkedScript( $this->getCSSJSLink( "jsgantt.js" ) ) );
-		$outputPage->addHeadItem( 'jsganttDateJS' , Html::linkedScript( $this->getCSSJSLink( "date-functions.js" ) ) );
+		$outputPage->addHeadItem( 'jsganttCSS'   , Html::linkedStyle( $this->getCSSJSLink( "jsgantt.css" ) ) );
+		$outputPage->addHeadItem( 'jsganttJS'    , Html::linkedScript( $this->getCSSJSLink( "jsgantt.js" ) ) );
+		$outputPage->addHeadItem( 'jsganttDateJS', Html::linkedScript( $this->getCSSJSLink( "date-functions.js" ) ) );
 
 		// generate i18n messages and append
-		$outputPage->addHeadItem( 'jsganttLangJS' , Html::linkedScript( $this->createJSi18nFile() ) );
-		
+		$outputPage->addHeadItem( 'jsganttLangJS', Html::linkedScript( $this->createJSi18nFile() ) );
 		
 		/*
 		// Only works out of cache => has to be moved to the output
@@ -370,10 +378,10 @@ class ecJSGantt {
 	}
 
 	/**
-		Output Hook as seen in OggHandler by Tim Starling :-)
+		Output Hook to setup extra headers
 	*/
 	function outputHook( $outputPage, $parserOutput, $data ) {
-		global $wgScriptPath;
+		//global $wgScriptPath;
 		
 		$this->setupHeaders( $outputPage );
 	}
