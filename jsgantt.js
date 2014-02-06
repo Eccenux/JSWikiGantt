@@ -1,4 +1,5 @@
-﻿/* 
+﻿// use with date-functions.js!
+/* 
    _        ___            _   _     _   ____  
   (_)___   / _ \__ _ _ __ | |_| |_  / | |___ \ 
   | / __| / /_\/ _` | '_ \| __| __| | |   __) |
@@ -190,13 +191,41 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 	var vShowComp = 1;
 	var vShowStartDate = 1;
 	var vShowEndDate = 1;
+	/*
 	var vDateInputFormat = "mm/dd/yyyy";
 	var vDateDisplayFormat = "mm/dd/yy";
+	*/
+	var vDateInputFormat = "m/d/Y";
+	var vDateDisplayFormat = "m/d/y";
+	// date format in formats captions
+	var vDateDisplayFormatCaptions = {
+		'day' : {
+			/*
+			'from' : 'm/d - ',
+			'to' : 'm/d/y'
+			*/
+			'from' : 'M Y (d-',
+			'to' : 'd)'
+		},
+		'week' : {
+			'upper' : 'Y',
+			'lower' : '[m/d'
+		},
+		'month' : {
+			'upper' : 'Y',
+			'lower' : 'M'
+		},
+		'quarter' : {
+			'upper' : 'Y'
+			//'lower' : '"Qtr." Q'	// FIXME
+		}
+	};
+	
 	var vNumUnits  = 0;
 	var vCaptionType;
 	var vDepId = 1;
 	var vTaskList     = new Array();	
-	var vFormatArr	= new Array("day","week","month","quarter");
+	var vFormatArr	= new Array("day","week","month","quarter");	// formats to display
 	var vQuarterArr   = new Array(1,1,1,2,2,2,3,3,3,4,4,4);
 	var vMonthDaysArr = new Array(31,28,31,30,31,30,31,31,30,31,30,31);
 	var vMonthArr     = new Array("January","February","March","April","May","June","July","August","September","October","November","December");
@@ -400,7 +429,7 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 	}
 
 
-	this.Draw = function()
+	this.Draw = function(pNameWidth)
 	{
 		var vMaxDate = new Date();
 		var vMinDate = new Date();	
@@ -422,9 +451,14 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 		var vNumDays = 0;
 		var vDayWidth = 0;
 		var vStr = "";
-		var vNameWidth = 70;
+		var vNameWidth = 300;
+		if (pNameWidth)
+		{
+			vNameWidth = pNameWidth;
+		}
 		var vStatusWidth = 70;
-		var vLeftWidth = 15 + vNameWidth + 70 + 70 + 70 + 70 + 70;
+		// moved below
+		//var vLeftWidth = 15 + vNameWidth + 70 + 70 + 70 + 70 + 70;
 
 		if(vTaskList.length > 0)
 		{
@@ -481,13 +515,15 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				'<TABLE id=theTable cellSpacing=0 cellPadding=0 border=0><TBODY><TR>' +
 				'<TD vAlign=top bgColor=#ffffff>'
 			;
+			
+			if(vShowRes ==1) vNameWidth+=vStatusWidth;
+			if(vShowDur ==1) vNameWidth+=vStatusWidth;
+			if(vShowComp==1) vNameWidth+=vStatusWidth;
+			if(vShowStartDate==1) vNameWidth+=vStatusWidth;
+			if(vShowEndDate==1) vNameWidth+=vStatusWidth;
+			//
+			var vLeftWidth = 15 + vNameWidth;
 
-			if(vShowRes !=1) vNameWidth+=vStatusWidth;
-			if(vShowDur !=1) vNameWidth+=vStatusWidth;
-			if(vShowComp!=1) vNameWidth+=vStatusWidth;
-			if(vShowStartDate!=1) vNameWidth+=vStatusWidth;
-			if(vShowEndDate!=1) vNameWidth+=vStatusWidth;
-		
 			// DRAW the Left-side of the chart (names, resources, comp%)
 			vLeftTable =
 				'<DIV class=scroll id=leftside style="width:' + vLeftWidth + 'px"><TABLE cellSpacing=0 cellPadding=0 border=0><TBODY>' +
@@ -577,7 +613,8 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 
 			// DRAW the date format selector at bottom left.  Another potential GanttChart parameter to hide/show this selector
 			vLeftTable += '</TD></TR>' +
-				'<TR><TD border=1 colspan=5 align=left style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 11px; BORDER-LEFT: #efefef 1px solid; height=18px">&nbsp;&nbsp;Powered by <a href=http://www.jsgantt.com>jsGantt</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Format:';
+				//'<TR><TD border=1 colspan=5 align=left style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 11px; BORDER-LEFT: #efefef 1px solid; height=18px">&nbsp;&nbsp;Powered by <a href=http://www.jsgantt.com>jsGantt</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Format:';
+				'<TR><TD colspan="5" class="format_chooser">Format:';
 
 			if (vFormatArr.join().indexOf("minute")!=-1)
 			{
@@ -655,20 +692,28 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				
 				if(vFormat == 'day')
 				{
-					vRightTable += '<td class=gdatehead style="FONT-SIZE: 12px; HEIGHT: 19px;" align=center colspan=7>' +
-					JSGantt.formatDateStr(vTmpDate,vDateDisplayFormat.substring(0,5)) + ' - ';
+					vRightTable += '<td class=gdatehead style="FONT-SIZE: 12px; HEIGHT: 19px;" align=center colspan=7>'
+						+ JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions.day.from)
+						//+ JSGantt.formatDateStr(vTmpDate,vDateDisplayFormat.substring(0,5)) + ' - '
+						//+ "FIXME" + ' - '
+					;
 					vTmpDate.setDate(vTmpDate.getDate()+6);
-					vRightTable += JSGantt.formatDateStr(vTmpDate, vDateDisplayFormat) + '</td>';
+					vRightTable += JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions.day.to) + '</td>';
 					vTmpDate.setDate(vTmpDate.getDate()+1);
 				}
 				else if(vFormat == 'week')
 				{
-					vRightTable += '<td class=gdatehead align=center style="FONT-SIZE: 12px; HEIGHT: 19px;" width='+vColWidth+'px>`'+ vStr + '</td>';
+					//vRightTable += '<td class=gdatehead align=center style="FONT-SIZE: 12px; HEIGHT: 19px;" width='+vColWidth+'px>`'+ vStr + '</td>';
+					vRightTable += '<td class=gdatehead align=center style="FONT-SIZE: 12px; HEIGHT: 19px;" width='+vColWidth+'px>'+ 
+						+ JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions[vFormat].upper)
+						+ '</td>';
 					vTmpDate.setDate(vTmpDate.getDate()+7);
 				}
 				else if(vFormat == 'month')
 				{
-					vRightTable += '<td class=gdatehead align=center style="FONT-SIZE: 12px; HEIGHT: 19px;" width='+vColWidth+'px>`'+ vStr + '</td>';
+					vRightTable += '<td class=gdatehead align=center style="FONT-SIZE: 12px; HEIGHT: 19px;" width='+vColWidth+'px>'+ 
+						+ JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions[vFormat].upper)
+						+ '</td>';
 					vTmpDate.setDate(vTmpDate.getDate() + 1);
 					while(vTmpDate.getDate() > 1)
 					{
@@ -677,7 +722,9 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				}
 				else if(vFormat == 'quarter')
 				{
-					vRightTable += '<td class=gdatehead align=center style="FONT-SIZE: 12px; HEIGHT: 19px;" width='+vColWidth+'px>`'+ vStr + '</td>';
+					vRightTable += '<td class=gdatehead align=center style="FONT-SIZE: 12px; HEIGHT: 19px;" width='+vColWidth+'px>'+ 
+						+ JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions[vFormat].upper)
+						+ '</td>';
 					vTmpDate.setDate(vTmpDate.getDate() + 81);
 					while(vTmpDate.getDate() > 1)
 					{
@@ -722,7 +769,8 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 
 				else if(vFormat == 'day' )
 				{
-					if( JSGantt.formatDateStr(vCurrDate,'mm/dd/yyyy') == JSGantt.formatDateStr(vTmpDate,'mm/dd/yyyy'))
+					// is it today?
+					if( JSGantt.formatDateStr(vCurrDate,'yyyy-mm-dd') == JSGantt.formatDateStr(vTmpDate,'yyyy-mm-dd'))
 					{
 						vWeekdayColor  = "ccccff";
 						vWeekendColor  = "9999ff";
@@ -745,7 +793,8 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 					else
 					{
 						vDateRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; HEIGHT: 19px; BORDER-LEFT: #efefef 1px solid;"  bgcolor=#' + vWeekdayColor + ' align=center><div style="width: '+vColWidth+'px">' + vTmpDate.getDate() + '</div></td>';
-						if( JSGantt.formatDateStr(vCurrDate,'mm/dd/yyyy') == JSGantt.formatDateStr(vTmpDate,'mm/dd/yyyy')) 
+						// is it today?
+						if( JSGantt.formatDateStr(vCurrDate,'yyyy-mm-dd') == JSGantt.formatDateStr(vTmpDate,'yyyy-mm-dd'))
 							vItemRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid; cursor: default;"  bgcolor=#' + vWeekdayColor + ' align=center><div style="width: '+vColWidth+'px">&nbsp&nbsp</div></td>';
 						else
 							vItemRowStr += '<td class="ghead" style="BORDER-TOP: #efefef 1px solid; FONT-SIZE: 12px; BORDER-LEFT: #efefef 1px solid; cursor: default;"  align=center><div style="width: '+vColWidth+'px">&nbsp&nbsp</div></td>';
@@ -1452,7 +1501,8 @@ JSGantt.taskLink = function(pRef,pWidth,pHeight)
 
 JSGantt.parseDateStr = function(pDateStr,pFormatStr)
 {
-	var vDate =new Date();	
+	/**
+	var vDate =new Date();
 	vDate.setTime( Date.parse(pDateStr));
 
 	switch(pFormatStr) 
@@ -1472,11 +1522,15 @@ JSGantt.parseDateStr = function(pDateStr,pFormatStr)
 	}
 
 	return(vDate);
-	
+	/**/
+	var vDate = Date.parseDate(pDateStr, pFormatStr);
+	return(vDate);
+	/**/
 }
 
 JSGantt.formatDateStr = function(pDate,pFormatStr)
 {
+	/**
 	vYear4Str = pDate.getFullYear() + '';
 	vYear2Str = vYear4Str.substring(2,4);
 	vMonthStr = (pDate.getMonth()+1) + '';
@@ -1502,7 +1556,9 @@ JSGantt.formatDateStr = function(pDate,pFormatStr)
 			return( vMonthStr + '/' + vDayStr );
 		case 'dd/mm':
 			return( vDayStr + '/' + vMonthStr );
-	}		 
+	}
+	/**/
+	return(pDate.dateFormat(pFormatStr));
 }
 
 JSGantt.parseXML = function(ThisFile,pGanttVar)

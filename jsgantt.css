@@ -48,3 +48,4 @@ DIV.scroll { BORDER-RIGHT: #efefef 1px solid; PADDING-RIGHT: 0px; BORDER-TOP: #e
 
 DIV.scroll2 { position:relative; PADDING-RIGHT: 0px; overflow:auto ;overflow-x:scroll;overflow-y:hidden; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; WIDTH: 482px; PADDING-TOP: 0px; BACKGROUND-COLOR: #ffffff }
 
+.format_chooser {border-top: #efefef 1px solid; font-size: 12px; border-left: #efefef 1px solid; height:18px}

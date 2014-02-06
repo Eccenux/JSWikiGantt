@@ -1,13 +1,31 @@
-﻿// globalny obiekt gantowy
+﻿// global gant object (needed for jsgantt)
 var oJSGant;
 
-// id elementu w którym wyświetlany jest harmonogram
-var elGantDivID = 'GanttChartDIV';
+// global gant loader object
+var oJSGantLoader = {
+	conf : {
+		elGantDivID : 'GanttChartDIV',	// gant element (a link should be added to it)
+		intNamesWidth : 300,			// names width
+		strDateDisplayFormat : 'Y-m-d',		// basic date format
+		/*
+		strDateDisplayFormat : 'Y-m-d',		// headers date formats
+		
+		}
+		*/
+		'':''
+	}
+	/*
+	FIXME
+	lang : {
+		months : 
+	}
+	*/
+};
 
-// funkcja wczytująca dane
-addOnloadHook(function()
+// Init gantt
+oJSGantLoader.load = function()
 {
-	var elGantDiv = document.getElementById(elGantDivID);
+	var elGantDiv = document.getElementById(this.conf.elGantDivID);
 	if (!elGantDiv)
 	{
 		return;
@@ -17,7 +35,8 @@ addOnloadHook(function()
 	try
 	{
 		var strXmlUrl = elGantDiv.getElementsByTagName('a')[0].href;
-		strXmlUrl += '?action=raw';
+		//strXmlUrl += '?action=raw';
+		strXmlUrl = 'project.xml';
 	}
 	catch(e)
 	{
@@ -39,7 +58,7 @@ addOnloadHook(function()
 	var vMonthArr     = new Array("January","February","March","April","May","June","July","August","September","October","November","December");
 	*/
 	oJSGant.setMonthArr("Styczeń","Luty","Marzec","Kwiecień","Maj","Czerwiec","Lipiec","Sierpień","Wrzesień","Październik","Listopad","Grudzień");
-	oJSGant.setDateDisplayFormat ('yyyy-mm-dd');
+	oJSGant.setDateDisplayFormat (this.conf.strDateDisplayFormat);
 	
 	oJSGant.setShowRes(0); // Show/Hide Responsible (0/1)
 	oJSGant.setShowDur(0); // Show/Hide Duration (0/1)
@@ -53,7 +72,7 @@ addOnloadHook(function()
 		// Parameters (pID, pName, pStart, pEnd, pColor, pLink, pMile, pRes,  pComp, pGroup, pParent, pOpen)
 		// use the XML file parser 
 		JSGantt.parseXML(strXmlUrl,oJSGant)
-		oJSGant.Draw();	
+		oJSGant.Draw(this.conf.intNamesWidth);	
 		oJSGant.DrawDependencies();
 	}
 	else
@@ -61,5 +80,10 @@ addOnloadHook(function()
 		var strError = 'Niespodziewany błąd!';
 		elGantDiv.appendChild(document.createTextNode(strError));
 	}
-});
+}
 
+
+//
+// Loader
+//
+addOnloadHook(function() {oJSGantLoader.load()});
