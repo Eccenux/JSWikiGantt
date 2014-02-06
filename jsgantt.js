@@ -1,5 +1,4 @@
-﻿// use with date-functions.js!
-/* 
+﻿/* 
    _        ___            _   _     _   ____  
   (_)___   / _ \__ _ _ __ | |_| |_  / | |___ \ 
   | / __| / /_\/ _` | '_ \| __| __| | |   __) |
@@ -33,7 +32,41 @@ Copyright (c) 2009, Shlomy Gantz BlueBrick Inc. All rights reserved.
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+/**
+	@note This file was modified from original version to better fit using with Wiki and preferences of JSWikiGantt developer :-)
+	 - for easier change of date format => must use with date-functions.js!
+	 - more or less xhtml compatible (lower case element names mostly - not that it really matters, but...)
+	 - i18n
+
+	@todo rewrite this.Draw into DOoM ;-) - so that we can attach events and skip oJSGant madness
+	@todo loader and inline gantt i18n stuff - should be here or move it back to jsgantt_inline.js/jsgantt_loader.js?
+*/
+
 var JSGantt; if (!JSGantt) JSGantt = {};
+
+// i18n
+JSGantt.lang = {'':''
+	// display format
+	,'format-label' : 'Format:'
+	,'format-quarter' : 'Quarter'
+	,'format-month' : 'Month'
+	,'format-week' : 'Week'
+	,'format-day' : 'Day'
+	,'format-hour' : 'Hour'
+	,'format-minute' : 'Minute'
+	// headers
+	,'header-res':      'Zasób'
+	,'header-dur':      'Czas trwania'
+	,'header-comp':     '% Ukoń'
+	,'header-startdate':'Rozpoczęcie'
+	,'header-enddate':  'Zakończenie'
+	// quarters date format part
+	,'quarter-short' : 'Qtr.'
+	// loader and inline gantt stuff
+	,'no-xml-link-error' : 'Error! A link to an article containing the diagram data is missing. The link to an XML data article is to be put inside an element with id \"%el_id%\".'
+	,'xml-parse-error' : 'Parse error! The XML file is badly formed or the URL is incorrect.'
+	,'unexpected-error' : 'Unexpected error!'
+}
 
 var vTimeout = 0;
 var vBenchTime = new Date().getTime();
@@ -209,7 +242,7 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 		},
 		'quarter' : {
 			'upper' : 'Y',
-			'lower' : '"Qtr." q'
+			'lower' : '"'+JSGantt.lang['quarter-short']+'" q'
 		}
 	};
 	
@@ -414,7 +447,6 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 		}
 	}
 
-
 	this.Draw = function(pNameWidth)
 	{
 		var vMaxDate = new Date();
@@ -532,11 +564,11 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 			{
 				return '  <th style="width: ' + pColWidth + 'px;">'+pDesc+'</th>';
 			}
-			if(vShowRes ==1) vLeftTable += tmpfunTaskDescHeaderAdd (vStatusWidth, 'Zasób');
-			if(vShowDur ==1) vLeftTable += tmpfunTaskDescHeaderAdd (vStatusWidth, 'Czas trwania');
-			if(vShowComp==1) vLeftTable += tmpfunTaskDescHeaderAdd (vStatusWidth, '% Ukoń');
-			if(vShowStartDate==1) vLeftTable += tmpfunTaskDescHeaderAdd (vStatusWidth, 'Rozpoczęcie');
-			if(vShowEndDate==1) vLeftTable += tmpfunTaskDescHeaderAdd (vStatusWidth, 'Zakończenie');
+			if(vShowRes ==1)      vLeftTable += tmpfunTaskDescHeaderAdd (vStatusWidth, JSGantt.lang['header-res']);
+			if(vShowDur ==1)      vLeftTable += tmpfunTaskDescHeaderAdd (vStatusWidth, JSGantt.lang['header-dur']);
+			if(vShowComp==1)      vLeftTable += tmpfunTaskDescHeaderAdd (vStatusWidth, JSGantt.lang['header-comp']);
+			if(vShowStartDate==1) vLeftTable += tmpfunTaskDescHeaderAdd (vStatusWidth, JSGantt.lang['header-startdate']);
+			if(vShowEndDate==1)   vLeftTable += tmpfunTaskDescHeaderAdd (vStatusWidth, JSGantt.lang['header-enddate']);
 			
 			vLeftTable += '</tr>';
 
@@ -561,15 +593,12 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				var isDuplicateTaskToBeMovedUp = false;
 				if (vLeftTable.indexOf(' id=child_' + vID + ' ')==-1)	// to allow more bars on one row
 				{
-					if(vTaskList[i].getVisible() == 0) 
-						vLeftTable += '<TR id=child_' + vID + ' bgcolor=#' + vBGColor + ' style="display:none"  onMouseover=oJSGant.mouseOver(this,' + vID + ',"left","' + vRowType + '") onMouseout=oJSGant.mouseOut(this,' + vID + ',"left","' + vRowType + '")>' ;
-					else
-						vLeftTable += '<TR id=child_' + vID + ' bgcolor=#' + vBGColor + ' onMouseover=oJSGant.mouseOver(this,' + vID + ',"left","' + vRowType + '") onMouseout=oJSGant.mouseOut(this,' + vID + ',"left","' + vRowType + '")>' ;
+					vLeftTable += '<tr id=child_' + vID + ' bgcolor=#' + vBGColor + (vTaskList[i].getVisible()==0 ? 'style="display:none"' : '') + ' onmouseover="oJSGant.mouseOver(this,' + vID + ',"left","' + vRowType + '")" onmouseout="oJSGant.mouseOut(this,' + vID + ',"left","' + vRowType + '")">' ;
 				}
 				else
 				{
 					isDuplicateTaskToBeMovedUp = true;
-					vLeftTable += '<TR style="display:none;">' ;
+					vLeftTable += '<tr style="display:none;">' ;
 				}
 
 
@@ -586,9 +615,9 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				if( vTaskList[i].getGroup())
 				{
 					if( vTaskList[i].getOpen() == 1) 
-						vLeftTable += '<SPAN id="group_' + vID + '" style="color:#000000; cursor:pointer; font-weight:bold;" onclick="JSGantt.folder(' + vID + ','+vGanttVar+');'+vGanttVar+'.DrawDependencies();">&ndash;</span><span style="color:#000000">&nbsp</SPAN>' ;
+						vLeftTable += '<span id="group_' + vID + '" style="color:#000000; cursor:pointer; font-weight:bold;" onclick="JSGantt.folder(' + vID + ','+vGanttVar+');'+vGanttVar+'.DrawDependencies();">&ndash;</span><span style="color:#000000">&nbsp</span>' ;
 					else
-						vLeftTable += '<SPAN id="group_' + vID + '" style="color:#000000; cursor:pointer; font-weight:bold;" onclick="JSGantt.folder(' + vID + ','+vGanttVar+');'+vGanttVar+'.DrawDependencies();">+</span><span style="color:#000000">&nbsp</SPAN>' ;
+						vLeftTable += '<span id="group_' + vID + '" style="color:#000000; cursor:pointer; font-weight:bold;" onclick="JSGantt.folder(' + vID + ','+vGanttVar+');'+vGanttVar+'.DrawDependencies();">+</span><span style="color:#000000">&nbsp</span>' ;
 				}
 				else
 				{
@@ -598,30 +627,30 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				if (vTaskList[i].getLink().length>0)
 				{
 					//vLeftTable += '<span title="'+ vTaskList[i].getName() +'" onclick=JSGantt.taskLink("' + vTaskList[i].getLink() + '",300,200); style="cursor:pointer"> ' + vTaskList[i].getName() + '</span></NOBR></TD>' ;
-					vLeftTable += ' <span title="'+ vTaskList[i].getName() +'" class="linked_task"><a onclick="JSGantt.taskLink(\'' + vTaskList[i].getLink() + '\',700,600); return false;" href="'+ vTaskList[i].getLink() +'" target="_blank">' + vTaskList[i].getName() + '</a></span></NOBR></TD>' ;
+					vLeftTable += ' <span title="'+ vTaskList[i].getName() +'" class="linked_task"><a onclick="JSGantt.taskLink(\'' + vTaskList[i].getLink() + '\',700,600); return false;" href="'+ vTaskList[i].getLink() +'" target="_blank">' + vTaskList[i].getName() + '</a></span></nobr></td>' ;
 				}
 				else
 				{
-					vLeftTable += ' <span title="'+ vTaskList[i].getName() +'">' + vTaskList[i].getName() + '</span></NOBR></TD>' ;
+					vLeftTable += ' <span title="'+ vTaskList[i].getName() +'">' + vTaskList[i].getName() + '</span></nobr></td>' ;
 				}
 
-				if(vShowRes ==1) vLeftTable += '  <td class="gtaskdesc"><NOBR>' + vTaskList[i].getResource() + '</NOBR></TD>' ;
-				if(vShowDur ==1) vLeftTable += '  <td class="gtaskdesc"><NOBR>' + vTaskList[i].getDuration(vFormat) + '</NOBR></TD>' ;
-				if(vShowComp==1) vLeftTable += '  <td class="gtaskdesc"><NOBR>' + vTaskList[i].getCompStr()  + '</NOBR></TD>' ;
-				if(vShowStartDate==1) vLeftTable += '  <td class="gtaskdesc"><NOBR>' + JSGantt.formatDateStr( vTaskList[i].getStart(), vDateDisplayFormat) + '</NOBR></TD>' ;
-				if(vShowEndDate==1) vLeftTable += '  <td class="gtaskdesc"><NOBR>' + JSGantt.formatDateStr( vTaskList[i].getEnd(), vDateDisplayFormat) + '</NOBR></TD>' ;
+				if(vShowRes ==1) vLeftTable += '  <td class="gtaskdesc"><nobr>' + vTaskList[i].getResource() + '</nobr></td>' ;
+				if(vShowDur ==1) vLeftTable += '  <td class="gtaskdesc"><nobr>' + vTaskList[i].getDuration(vFormat) + '</nobr></td>' ;
+				if(vShowComp==1) vLeftTable += '  <td class="gtaskdesc"><nobr>' + vTaskList[i].getCompStr()  + '</nobr></td>' ;
+				if(vShowStartDate==1) vLeftTable += '  <td class="gtaskdesc"><nobr>' + JSGantt.formatDateStr( vTaskList[i].getStart(), vDateDisplayFormat) + '</nobr></td>' ;
+				if(vShowEndDate==1) vLeftTable += '  <td class="gtaskdesc"><nobr>' + JSGantt.formatDateStr( vTaskList[i].getEnd(), vDateDisplayFormat) + '</nobr></td>' ;
 
 				vLeftTable += '</TR>';
 			}
 
 			// DRAW the date format selector at bottom left.  Another potential GanttChart parameter to hide/show this selector
-			vLeftTable += '</TD></TR>' +
-				'<TR><TD colspan="5" class="format_chooser">Format:';
+			vLeftTable += '</td></tr>' +
+				'<tr><td colspan="5" class="format_chooser">'+JSGantt.lang['format-label'];
 
 			if (vFormatArr.join().indexOf("minute")!=-1)
 			{
-				if (vFormat=='minute') vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" VALUE="minute" checked>Minuty';
-				else                vLeftTable += '<INPUT TYPE=RADIO NAME="radFormat" onclick=JSGantt.changeFormat("minute",'+vGanttVar+'); VALUE="minute">Minuty';
+				if (vFormat=='minute') vLeftTable += '<input type=radio name="radFormat" value="minute" checked />'+JSGantt.lang['format-minute'];
+				else                vLeftTable += '<input type=radio name="radFormat" onclick=JSGantt.changeFormat("minute",'+vGanttVar+'); value="minute" />'+JSGantt.lang['format-minute'];
 			}
 			
 			// TODO: temporary function - should simply be done in a loop over formats array/object
@@ -634,37 +663,37 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 			}
 			if (vFormatArr.join().indexOf("hour")!=-1)
 			{
-				vLeftTable += tmpfunFormatAdd(vFormat, 'hour', 'Godziny');
+				vLeftTable += tmpfunFormatAdd(vFormat, 'hour', JSGantt.lang['format-hour']);
 			}
 			if (vFormatArr.join().indexOf("day")!=-1)
 			{
-				vLeftTable += tmpfunFormatAdd(vFormat, 'day', 'Dni');
+				vLeftTable += tmpfunFormatAdd(vFormat, 'day', JSGantt.lang['format-day']);
 			}
 			if (vFormatArr.join().indexOf("week")!=-1)
 			{
-				vLeftTable += tmpfunFormatAdd(vFormat, 'week', 'Tygodnie');
+				vLeftTable += tmpfunFormatAdd(vFormat, 'week', JSGantt.lang['format-week']);
 			}
 			if (vFormatArr.join().indexOf("month")!=-1)
 			{ 
-				vLeftTable += tmpfunFormatAdd(vFormat, 'month', 'Miesiące');
+				vLeftTable += tmpfunFormatAdd(vFormat, 'month', JSGantt.lang['format-month']);
 			}
 			if (vFormatArr.join().indexOf("quarter")!=-1)
 			{
-				vLeftTable += tmpfunFormatAdd(vFormat, 'quarter', 'Kwartały');
+				vLeftTable += tmpfunFormatAdd(vFormat, 'quarter', JSGantt.lang['format-quarter']);
 			}
 			
 			// vLeftTable += '<INPUT TYPE=RADIO NAME="other" VALUE="other" style="display:none"> .';
 
-			vLeftTable += '</TD></TR></TBODY></TABLE></TD>';
+			vLeftTable += '</td></tr></tbody></table></td>';
 
 			vMainTable += vLeftTable;
 
 			// Draw the Chart Rows
 			vRightTable = 
-			'<TD>' +
-			'<DIV class="chartarea" id="rightside">' +
-			'<TABLE>' +
-			'<TBODY><TR>';
+			'<td>' +
+			'<div class="chartarea" id="rightside">' +
+			'<table>' +
+			'<tbody><tr>';
 
 			vTmpDate.setFullYear(vMinDate.getFullYear(), vMinDate.getMonth(), vMinDate.getDate());
 			vTmpDate.setHours(0);
@@ -735,7 +764,7 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 
 			}
 
-			vRightTable += '</TR><TR>';
+			vRightTable += '</tr><tr>';
 
 			// Minor Date header and Cell Rows
 			vTmpDate.setFullYear(vMinDate.getFullYear(), vMinDate.getMonth(), vMinDate.getDate());
@@ -919,8 +948,8 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				}
 			}
 
-			vRightTable += vDateRowStr + '</TR>';
-			vRightTable += '</TBODY></TABLE>';
+			vRightTable += vDateRowStr + '</tr>';
+			vRightTable += '</tbody></table>';
 
 			// Draw each row
 
@@ -949,20 +978,20 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				if (vRightTable.indexOf(' id=childgrid_' + vID + ' ')==-1)	// to allow more bars on one row
 				{
 					if(vTaskList[i].getVisible() == 0)
-						vRightTable += '<DIV id=childgrid_' + vID + ' style="position:relative; display:none;">';
+						vRightTable += '<div id=childgrid_' + vID + ' style="position:relative; display:none;">';
 					else
-						vRightTable += '<DIV id=childgrid_' + vID + ' style="position:relative">';
+						vRightTable += '<div id=childgrid_' + vID + ' style="position:relative">';
 				}
 				else
 				{
 					isDuplicateTaskToBeMovedUp = true;
-					vRightTable += '<DIV style="position:relative; top:-20px;">';
+					vRightTable += '<div style="position:relative; top:-20px;">';
 				}
 				
 				if( vTaskList[i].getMile())
 				{
-					vRightTable += '<DIV><TABLE style="position:relative; top:0px; width: ' + vChartWidth + 'px;">' +
-						'<TR id=childrow_' + vID + ' class=yesdisplay onMouseover=oJSGant.mouseOver(this,' + vID + ',"right","mile") onMouseout=oJSGant.mouseOut(this,' + vID + ',"right","mile")>' + vItemRowStr + '</TR></TABLE></DIV>';
+					vRightTable += '<div><table style="position:relative; top:0px; width: ' + vChartWidth + 'px;">' +
+						'<tr id=childrow_' + vID + ' class=yesdisplay onmouseover="oJSGant.mouseOver(this,' + vID + ',\'right\',\'mile\')" onmouseout="oJSGant.mouseOut(this,' + vID + ',\'right\',\'mile\')>"' + vItemRowStr + '</TR></TABLE></DIV>';
 
 					// Build date string for Title
 					vDateRowStr = JSGantt.formatDateStr(vTaskStart,vDateDisplayFormat);

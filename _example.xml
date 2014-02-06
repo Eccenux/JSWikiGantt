@@ -1,0 +1,48 @@
+<!--
+	Basic example taken from jsGantt page
+-->
+<jsgantt>
+<task>
+	<pID>10</pID>
+	<pName>WCF Changes</pName>
+	<pColor>0000ff</pColor>
+	<pLink></pLink>
+	<pMile>0</pMile>
+	<pRes></pRes>
+	<pComp>0</pComp>
+	<pGroup>1</pGroup>
+	<pParent>0</pParent>
+	<pOpen>1</pOpen>
+	<pDepend></pDepend>
+</task>
+<task>
+	<pID>20</pID>
+	<pName>Move to WCF from remoting</pName>
+	<pStart>2010-07-11</pStart>
+	<pEnd>2010-07-15</pEnd>
+	<pColor>0000ff</pColor>
+	<pLink></pLink>
+	<pMile>0</pMile>
+	<pRes>Rich</pRes>
+	<pComp>10</pComp>
+	<pGroup>0</pGroup>
+	<pParent>10</pParent>
+	<pOpen>1</pOpen>
+	<pDepend></pDepend>
+</task>
+<task>
+	<pID>30</pID>
+	<pName>add Auditing</pName>
+	<pStart>2010-07-19</pStart>
+	<pEnd>2010-07-21</pEnd>
+	<pColor>0000ff</pColor>
+	<pLink></pLink>
+	<pMile>0</pMile>
+	<pRes>Mal</pRes>
+	<pComp>50</pComp>
+	<pGroup>0</pGroup>
+	<pParent>10</pParent>
+	<pOpen>1</pOpen>
+	<pDepend>20</pDepend>
+</task>
+</jsgantt>

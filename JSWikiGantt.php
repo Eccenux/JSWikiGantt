@@ -31,13 +31,17 @@ if( !defined( 'MEDIAWIKI' ) ) {
 $wgExtensionCredits['parserhook'][] = array(
 	'path'         => __FILE__,
 	'name'         => 'JSWikiGantt',
-	'version'      => '0.3.0',
+	'version'      => '0.4.0',
 	'author'       => 'Maciej Jaros and others (see description)', 
 	'url'          => 'http://www.mediawiki.org/wiki/Extension:JSWikiGantt',
+	/*
 	'description'  => ''
 		." This extension adds a ''jsgantt'' tag in which you can define a Gantt diagram data to be drawn. Currently only one diagram per page."
 		.' Note! This extension is based on JSGantt project started by Shlomy Gantz and Xaprb JavaScript date formatting by Baron Schwartz.'
 		.' See jsgantt.js and date-functions.js for licensing details of this modules.'
+	*/
+	'descriptionmsg' => 'jswikigantt-desc',
+
 );
 
 //
@@ -54,6 +58,7 @@ require_once ("{$wgJSGanttDir}/JSWikiGantt.config.php");
 // Class setup
 //
 $wgAutoloadClasses['ecJSGantt'] = "{$wgJSGanttDir}/JSWikiGantt.body.php";
+$wgExtensionMessagesFiles['JSWikiGantt'] = "{$wgJSGanttDir}/JSWikiGantt.i18n.php";
 
 //
 // add hook setup and init class/object
@@ -63,5 +68,9 @@ function efJSGanttSetup( &$parser )
 {
 	// other hooks are added upon construct
 	new ecJSGantt;
+	
+	//wfLoadExtensionMessages( 'JSWikiGantt' );
+	//$wgExtensionMessagesFiles['JSWikiGantt'] = dirname( __FILE__ ) . '/JSWikiGantt.i18n.php';
+	
 	return true;
 }

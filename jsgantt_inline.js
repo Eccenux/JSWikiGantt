@@ -7,6 +7,7 @@ var oJSGant;
 // Global gant loader object
 //
 var oJSGantInline = {
+	//! @note Some settings also in this.init
 	conf : {
 		elGantDivID : 'GanttChartInline',	// gant element (a link should be added to it)
 		intNamesWidth : 300,			// names width
@@ -28,17 +29,12 @@ var oJSGantInline = {
 			},
 			'quarter' : {
 				'upper' : 'Y',
-				'lower' : '"Kw." q'
+				'lower' : '"'+JSGantt.lang['quarter-short']+'" q'
 			}
 		},
 		'':''
 	},
-	lang : {
-		'No XML Link Error' : 'Błąd! Brak linku do artkułu zawierającego dane haromonogramu. W elemencie z id "%el_id%" należy podać link do artykułu z danymi w formacie XML.',
-		'Unexpected Error' : 'Niespodziewany błąd!',
-		'XML Parse Error' : 'Błąd odczytu! Nieprawidłowy plik XML lub nieprawidłowy adres.',
-		'':''
-	}
+	lang : JSGantt.lang
 };
 
 //
@@ -90,7 +86,7 @@ oJSGantInline.draw = function()
 	}
 	else
 	{
-		this.displayError(this.lang['Unexpected Error']);
+		this.displayError(this.lang['unexpected-error']);
 	}
 }
 

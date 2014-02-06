@@ -12,7 +12,7 @@ $wgJSGanttConfig = array(
 	// might be overrriden from XML with <jsgantt autolinks="1"> or <task autolink="1">)
 	'AutoLinks' => 1,
 	// The link format for above. It needs to be 'something.something/script?my_task_id_param=%GANTT_TASK_ID% something else might follow'
-	'TasksAutoLink' => 'http://prl.mol.com.pl/bugz/index.php?do=details&task_id=%GANTT_TASK_ID%',
+	'TasksAutoLink' => 'http://your_bugzilla_domain.com/flyspray/index.php?do=details&task_id=%GANTT_TASK_ID%',
 );
 
 // change this to bypass cash and in effect refresh CSS and JS

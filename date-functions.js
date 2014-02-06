@@ -240,7 +240,8 @@ Date.formatCodeToRegex = function(character, currentGroup) {
     case "M":
         return {g:1,
             c:"m = parseInt(Date.monthNumbers[results[" + currentGroup + "]], 10);\n",
-            s:"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"};
+            //s:"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"};
+			s:"(" + Date.monthShortNames.join("|") + ")"};
     case "n":
     case "m":
         return {g:1,
@@ -422,29 +423,6 @@ String.leftPad = function (val, size, ch) {
 
 Date.quarterFromMonthNum = [1,1,1,2,2,2,3,3,3,4,4,4];
 Date.daysInMonth = [31,28,31,30,31,30,31,31,30,31,30,31];
-/*
-Date.monthNames =
-   ["January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December"];
-Date.dayNames =
-   ["Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday"];
-*/
 Date.y2kYear = 50;
 Date.monthNumbers = {
     Jan:0,
@@ -472,24 +450,40 @@ Date.patterns = {
     UniversalSortableDateTimePattern: "Y-m-d H:i:sO",
     YearMonthPattern: "F, Y"};
 
+/*
+// i18n
 Date.monthNames =
-   ["Styczeń",
-    "Luty",
-    "Marzec",
-    "Kwiecień",
-    "Maj",
-    "Czerwiec",
-    "Lipiec",
-    "Sierpień",
-    "Wrzesień",
-    "Październik",
-    "Listopad",
-    "Grudzień"];
+   ["January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"];
+Date.monthShortNames =
+   ["Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec"];
 Date.dayNames =
-   ["Niedziela",
-    "Poniedziałek",
-    "Wtorek",
-    "Środa",
-    "Czwartek",
-    "Piątek",
-    "Sobota"];
+   ["Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday"];
+*/
