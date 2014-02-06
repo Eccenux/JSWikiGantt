@@ -593,7 +593,7 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				var isDuplicateTaskToBeMovedUp = false;
 				if (vLeftTable.indexOf(' id=child_' + vID + ' ')==-1)	// to allow more bars on one row
 				{
-					vLeftTable += '<tr id=child_' + vID + ' bgcolor=#' + vBGColor + (vTaskList[i].getVisible()==0 ? 'style="display:none"' : '') + ' onmouseover="oJSGant.mouseOver(this,' + vID + ',"left","' + vRowType + '")" onmouseout="oJSGant.mouseOut(this,' + vID + ',"left","' + vRowType + '")">' ;
+					vLeftTable += '<tr id=child_' + vID + ' bgcolor="#' + vBGColor + '" ' + (vTaskList[i].getVisible()==0 ? 'style="display:none"' : '') + ' onmouseover="oJSGant.mouseOver(this,' + vID + ',"left","' + vRowType + '")" onmouseout="oJSGant.mouseOut(this,' + vID + ',"left","' + vRowType + '")">' ;
 				}
 				else
 				{

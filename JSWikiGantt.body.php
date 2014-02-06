@@ -101,14 +101,14 @@ class ecJSGantt {
 		@todo get content of the tag given by valName or an attribute with the same name
 	*/
 	private function getXMLIntVal( $task, $valName, $defaultVal ) {
-		// quite simple for now - might want to allow html inside tags...
+		$val = '';
 		wfSuppressWarnings();
-		$val = intval( $task->getElementsByTagName( $valName )->item( 0 )->nodeValue );
+		$val = $task->getElementsByTagName( $valName )->item( 0 )->nodeValue;
 		wfRestoreWarnings();
-		if( empty( $val ) ) {
-			return $defaultVal;
+		if( strlen( $val ) <= 0 ) {
+			return intval( $defaultVal );
 		}
-		return $val;
+		return intval( $val );
 	}
 	/**
 		Gets string value from the task item
