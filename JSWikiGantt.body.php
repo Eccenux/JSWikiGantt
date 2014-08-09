@@ -70,6 +70,18 @@ class ecJSGantt {
 		// ret renedered HTML
 		return $strRendered;
 	}
+	
+	/**
+		Render arguments to HTML element attributes.
+		
+		To conform with HTML5 `data-` prefixed attributes are produced.
+	*/
+	private static function argsToAttributes( $args ) {
+		$attrs = '';
+		foreach ( $args as $key => $value ) {
+			$attrs .= " data-{$key}='" . htmlspecialchars($value) . "'";
+		}
+	}
 
 	/**
 		Render our tag for the purpouse of loading an external XML
@@ -81,7 +93,7 @@ class ecJSGantt {
 		$out = $parser->replaceInternalLinks( $input, $frame );	// just parse links
 		return ''
 			.Html::linkedScript( $this->getCSSJSLink( "jsgantt_loader.js" ) )
-			.'<div id="GanttChartDIV">'
+			.'<div id="GanttChartDIV" '.self::argsToAttributes( $args ).'>'
 				.$out
 			.'</div>'
 		;
@@ -229,7 +241,7 @@ class ecJSGantt {
 			$this->strInlineOutput = $strScript;
 			return ''
 				.Html::linkedScript( $this->getCSSJSLink( "jsgantt_inline.js" ) )
-				.'<div id="GanttChartInline"></div>'
+				.'<div id="GanttChartInline" '.self::argsToAttributes( $args ).'></div>'
 				//.$strScript
 				.$this->strInlineOutputMarker;
 			;
