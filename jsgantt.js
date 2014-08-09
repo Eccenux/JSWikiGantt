@@ -68,6 +68,55 @@ JSGantt.lang = {'':''
 	,'unexpected-error' : 'Unexpected error!'
 }
 
+// jsgantt options to functions mapping
+JSGantt.attributeMapping = {
+	'option-show-responsible' : function (value) {
+		this.setShowRes(JSGantt.AttributeParser.toBoolInt(value));
+	},
+	'option-show-duration' : function (value) {
+		this.setShowDur(JSGantt.AttributeParser.toBoolInt(value));
+	},
+	'option-show-precent-complete' : function (value) {
+		this.setShowComp(JSGantt.AttributeParser.toBoolInt(value));
+	},
+	'option-show-start-date' : function (value) {
+		this.setShowStartDate(JSGantt.AttributeParser.toBoolInt(value));
+	},
+	'option-show-end-date' : function (value) {
+		this.setShowEndDate(JSGantt.AttributeParser.toBoolInt(value));
+	},
+	// Set to Show Caption (None,Caption,Resource,Duration,Complete)
+	'option-caption-type' : function (value) {
+		value = JSGantt.AttributeParser.toStringFromArray(value, 
+			['None','Caption','Resource','Duration','Complete'],
+			'Resource'
+		);
+		this.setCaptionType(value);
+	},
+}
+
+// Attribute parser helper singleton
+JSGantt.AttributeParser = new function() {
+	// transforms string value into 0/1 "boolean"
+	this.toBoolInt = function(value) {
+		var option = 0;
+		if (value.search(/^\s*(y|yes|true|1)\s*$/i)) {
+			option = 1;
+		}
+		return option;
+	}
+	this.toStringFromArray = function(value, possibleValues, fallbackValue) {
+		var option = fallbackValue;
+		for (var i = 0; i < possibleValues.length; i++) {
+			if (possibleValues[i] === value) {
+				option = value;
+				break;
+			}
+		}
+		return option;
+	}
+};
+
 var vTimeout = 0;
 var vBenchTime = new Date().getTime();
 
