@@ -78,12 +78,8 @@ oJSGantLoader.load = function()
 	oJSGant.setDateDisplayFormat (this.conf.strDateDisplayFormat);
 	oJSGant.setDateDisplayFormatCaptions (this.conf.oDateDisplayFormatCaptions);
 	
-	oJSGant.setShowRes(0); // Show/Hide Responsible (0/1)
-	oJSGant.setShowDur(0); // Show/Hide Duration (0/1)
-	oJSGant.setShowComp(0); // Show/Hide % Complete(0/1)
-	oJSGant.setShowStartDate(0);
-	oJSGant.setShowEndDate(0);
-	oJSGant.setCaptionType('Resource');  // Set to Show Caption (None,Caption,Resource,Duration,Complete)
+	// see JSGantt.attributeMapping for attribute name to option mapping
+	JSGantt.AttributeParser.setOptions(elGantDiv, oJSGant, 'data-');
 	
 	if (oJSGant)
 	{

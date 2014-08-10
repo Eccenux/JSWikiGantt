@@ -104,7 +104,7 @@ JSGantt.AttributeParser = new function() {
 			option = 1;
 		}
 		return option;
-	}
+	};
 	this.toStringFromArray = function(value, possibleValues, fallbackValue) {
 		var option = fallbackValue;
 		for (var i = 0; i < possibleValues.length; i++) {
@@ -114,7 +114,18 @@ JSGantt.AttributeParser = new function() {
 			}
 		}
 		return option;
-	}
+	};
+	this.setOptions = function(sourceElement, ganttObject, prefix) {
+		var mapping = JSGantt.attributeMapping;
+		for (option in mapping) {
+			var setter = mapping[option];
+			if (sourceElement.hasAttribute(prefix + option)) {
+				setter.call(ganttObject, sourceElement.getAttribute('data-'+option));
+			} else {
+				setter.call(ganttObject, '');
+			}
+		}
+	};
 };
 
 var vTimeout = 0;

@@ -81,6 +81,7 @@ class ecJSGantt {
 		foreach ( $args as $key => $value ) {
 			$attrs .= " data-{$key}='" . htmlspecialchars($value) . "'";
 		}
+		return $attrs;
 	}
 
 	/**
