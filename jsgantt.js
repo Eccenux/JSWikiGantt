@@ -100,7 +100,7 @@ JSGantt.AttributeParser = new function() {
 	// transforms string value into 0/1 "boolean"
 	this.toBoolInt = function(value) {
 		var option = 0;
-		if (value.search(/^\s*(y|yes|true|1)\s*$/i)) {
+		if (value.search(/^\s*(y|yes|true|on|1)\s*$/i) >= 0) {
 			option = 1;
 		}
 		return option;
@@ -117,7 +117,7 @@ JSGantt.AttributeParser = new function() {
 	};
 	this.setOptions = function(sourceElement, ganttObject, prefix) {
 		var mapping = JSGantt.attributeMapping;
-		for (option in mapping) {
+		for (var option in mapping) {
 			var setter = mapping[option];
 			if (sourceElement.hasAttribute(prefix + option)) {
 				setter.call(ganttObject, sourceElement.getAttribute('data-'+option));

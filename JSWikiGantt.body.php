@@ -146,14 +146,14 @@ class ecJSGantt {
 	*/
 	private function renderInnerXML( $input, $args, $parser, $frame ) {
 		$doc = new DOMDocument();
-		/*
+		/**
 		// DEBUG
 		echo "<pre style='position:absolute; top:2em; right:0; width:200px; overflow:scroll; z-index:100' onclick='this.style.display=\"none\"'>"
 			.htmlspecialchars( var_export( $args, true ) )
 			.htmlspecialchars( $input )
 		."</pre>"
 		;
-		*/
+		/**/
 		// get task elements
 		wfSuppressWarnings();
 		$doc->loadXML( '<root>'.$input.'</root>' );
