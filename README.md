@@ -25,7 +25,7 @@ As of `0.6.0` you can set some extra Gantt options from MediaWiki code e.g.:
 * `option-caption-type` - task caption (right side annotation) type. Avialbale types: None, Caption, Resource (default), Duration, Complete.
 
 ### MediaWiki 1.16 ###
-*Note!* Thoose options will NOT work in MediaWiki 1.16 or lower. You need to patch `includes/Sanitizer.php` by changing:
+*Note!* Those options will NOT work in MediaWiki 1.16 or lower. You need to patch `includes/Sanitizer.php` by changing:
 ```php
 $attrib = '[A-Za-z0-9]';
 ```
