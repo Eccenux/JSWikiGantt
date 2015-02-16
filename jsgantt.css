@@ -80,3 +80,7 @@
 .ganttchart .gheadwkend {
 	background-color: #cfcfcf;
 }
+
+.ganttchart .gdatehead {
+	white-space:nowrap;	/* fixes problems left/righ header size difference when chart ends in the midddle of the week */
+}
