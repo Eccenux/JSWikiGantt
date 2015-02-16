@@ -21,7 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
+/*
+	Basic usage:
+	var formatString = "Y-m-d";
+	var myStringDate = "2012-01-01";
+	
+	var myParsedDateObject = Date.parseDate(myStringDate, formatString);
+	var myReFormattedString = myParsedDateObject.dateFormat(formatString);
+*/
 Date.parseFunctions = {count:0};
 Date.parseRegexes = [];
 Date.formatFunctions = {count:0};
