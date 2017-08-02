@@ -1,7 +1,7 @@
 
 		/* gantt core */
 		JSGantt.lang['format-label']      = 'Format:';
-		JSGantt.lang['format-quarter']    = 'Quarter';
+		JSGantt.lang['format-quarter']    = 'Trimestre';
 		JSGantt.lang['format-month']      = 'Moi';
 		JSGantt.lang['format-week']       = 'Semaine';
 		JSGantt.lang['format-day']        = 'Jour';
@@ -16,7 +16,7 @@
 		JSGantt.lang['no-xml-link-error'] = 'Erreur! Un lien vers un article contenant les données du diagramme est manquant. Le lien vers un article de donnée XML devrait être mis dans un element avec id=\"%el_id%\".';
 		JSGantt.lang['unexpected-error']  = 'Erreur innatendue!';
 		JSGantt.lang['xml-parse-error']   = 'Erreur de parsing! Le fichier XML est malformé ou l'URL est incorrect.';
-		JSGantt.lang['quarter-short']     = 'Qtr.';
+		JSGantt.lang['quarter-short']     = 'Trim.';
 		/* date-functions */
 		Date.monthNames =
 		   ['Janvier',
