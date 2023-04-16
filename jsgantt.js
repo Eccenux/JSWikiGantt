@@ -1,4 +1,87 @@
-﻿/* 
+﻿/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
+	New JS Gnatt modules
+\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+
+/**
+	Simple, standalone data loader module
+	
+	@sa JSGantt.parseXML, JSGantt.parseXMLCode
+*/
+var oLoader = new Object();
+
+/**
+	Loads data from given url
+	
+	@note works synchronously
+*/
+oLoader.loadXMLDocFromURL = function(strURL)
+{
+	var xmlDoc;
+	if (window.XMLHttpRequest)
+	{
+		var oHTTP = new XMLHttpRequest();
+		oHTTP.open("GET", strURL, false);
+		oHTTP.overrideMimeType('text/xml');		// need for FF (otherwise responseXML might be null even if XML is valid)
+		oHTTP.send(null);
+		xmlDoc = oHTTP.responseXML;
+	}
+	// Internet Explorer
+	else
+	{
+		xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+		xmlDoc.async = false;
+		xmlDoc.load(strURL);
+	}
+	return xmlDoc;
+}
+
+/**
+	Loads data from given string
+
+	@note works synchronously
+*/
+oLoader.loadXMLDocFromStr = function(strXMLCode)
+{
+	var xmlDoc;
+	if (window.DOMParser)
+	{
+		var parser = new DOMParser();
+		xmlDoc = parser.parseFromString(strXMLCode, "text/xml");
+	}
+	// Internet Explorer
+	else
+	{
+		xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+		xmlDoc.async = false;
+		xmlDoc.loadXML(strXMLCode);
+	}
+	return xmlDoc;
+}
+
+/**
+	Returns XML source string from XML document (\a docXML)
+*/
+oLoader.convertXMLDocToStr = function(docXML)
+{	
+	var strXML;
+	if (window.XMLSerializer)
+	{
+		var serializer = new XMLSerializer();
+		strXML = serializer.serializeToString(docXML);
+	}
+	// Internet Explorer
+	else
+	{
+		strXML = docXML.xml;
+	}
+	return strXML;
+}
+
+/* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- *\
+	Old JS Gnatt
+\* -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- */
+
+/* 
    _        ___            _   _     _   ____  
   (_)___   / _ \__ _ _ __ | |_| |_  / | |___ \ 
   | / __| / /_\/ _` | '_ \| __| __| | |   __) |
@@ -68,66 +151,6 @@ JSGantt.lang = {'':''
 	,'unexpected-error' : 'Unexpected error!'
 }
 
-// jsgantt options to functions mapping
-JSGantt.attributeMapping = {
-	'option-show-responsible' : function (value) {
-		this.setShowRes(JSGantt.AttributeParser.toBoolInt(value));
-	},
-	'option-show-duration' : function (value) {
-		this.setShowDur(JSGantt.AttributeParser.toBoolInt(value));
-	},
-	'option-show-precent-complete' : function (value) {
-		this.setShowComp(JSGantt.AttributeParser.toBoolInt(value));
-	},
-	'option-show-start-date' : function (value) {
-		this.setShowStartDate(JSGantt.AttributeParser.toBoolInt(value));
-	},
-	'option-show-end-date' : function (value) {
-		this.setShowEndDate(JSGantt.AttributeParser.toBoolInt(value));
-	},
-	// Set to Show Caption (None,Caption,Resource,Duration,Complete)
-	'option-caption-type' : function (value) {
-		value = JSGantt.AttributeParser.toStringFromArray(value, 
-			['None','Caption','Resource','Duration','Complete'],
-			'Resource'
-		);
-		this.setCaptionType(value);
-	},
-}
-
-// Attribute parser helper singleton
-JSGantt.AttributeParser = new function() {
-	// transforms string value into 0/1 "boolean"
-	this.toBoolInt = function(value) {
-		var option = 0;
-		if (value.search(/^\s*(y|yes|true|on|1)\s*$/i) >= 0) {
-			option = 1;
-		}
-		return option;
-	};
-	this.toStringFromArray = function(value, possibleValues, fallbackValue) {
-		var option = fallbackValue;
-		for (var i = 0; i < possibleValues.length; i++) {
-			if (possibleValues[i] === value) {
-				option = value;
-				break;
-			}
-		}
-		return option;
-	};
-	this.setOptions = function(sourceElement, ganttObject, prefix) {
-		var mapping = JSGantt.attributeMapping;
-		for (var option in mapping) {
-			var setter = mapping[option];
-			if (sourceElement.hasAttribute(prefix + option)) {
-				setter.call(ganttObject, sourceElement.getAttribute('data-'+option));
-			} else {
-				setter.call(ganttObject, '');
-			}
-		}
-	};
-};
-
 var vTimeout = 0;
 var vBenchTime = new Date().getTime();
 
@@ -148,6 +171,11 @@ JSGantt.TaskItem = function(pID, pName, pStart, pEnd, pColor, pLink, pMile, pRes
 	var vEnd   = new Date();
 	var vColor = pColor;
 	var vLink  = pLink;
+	// skipping link when '#' or 'ignore' (helps adding non-linked info when autolinking is on)
+	if (pLink == '#' || pLink == 'ignore')
+	{
+		vLink = '';
+	}
 	var vMile  = pMile;
 	var vRes   = pRes;
 	var vComp  = pComp;
@@ -373,6 +401,11 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 		}
 	}
 
+	this.ClearTasksData = function()
+	{
+		vTaskList = new Array();
+	}
+
 	this.AddTaskItem = function(value)
 	{
 		vTaskList.push(value);
@@ -497,7 +530,7 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				{
 					var vTask = this.getArrayLocationByID(vDepList[k]);
 					
-					if(vList[vTask].getVisible()==1)
+					if(vTask>=0 && vList[vTask].getVisible()==1)
 						this.drawDependency(vList[vTask].getEndX(),vList[vTask].getEndY(),vList[i].getStartX()-1,vList[i].getStartY())
 				}
 			}
@@ -508,11 +541,14 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 	this.getArrayLocationByID = function(pId)
 	{
 		var vList = this.getList();
+		pId = Math.floor(pId);	// removing resource id (i.e. "123.56" = 123)
 		for(var i = 0; i < vList.length; i++)
 		{
-			if(vList[i].getID()==pId)
+			var id = Math.floor(vList[i].getID());
+			if(id==pId)
 				return i;
 		}
+		return -1;
 	}
 
 	this.Draw = function(pNameWidth)
@@ -695,7 +731,7 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				if (vTaskList[i].getLink().length>0)
 				{
 					//vLeftTable += '<span title="'+ vTaskList[i].getName() +'" onclick=JSGantt.taskLink("' + vTaskList[i].getLink() + '",300,200); style="cursor:pointer"> ' + vTaskList[i].getName() + '</span></NOBR></TD>' ;
-					vLeftTable += ' <span title="'+ vTaskList[i].getName() +'" class="linked_task"><a onclick="JSGantt.taskLink(\'' + vTaskList[i].getLink() + '\',700,600); return false;" href="'+ vTaskList[i].getLink() +'" target="_blank">' + vTaskList[i].getShortName(pNameWidth) + '</a></span></nobr></td>' ;
+					vLeftTable += ' <span title="'+ vTaskList[i].getName() +'" class="linked_task"><a onclick="JSGantt.taskLink(this, \'' + vTaskList[i].getLink() + '\',700,600); return false;" href="'+ vTaskList[i].getLink() +'" target="_blank">' + vTaskList[i].getShortName(pNameWidth) + '</a></span></nobr></td>' ;
 				}
 				else
 				{
@@ -790,7 +826,10 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				
 				if(vFormat == 'day')
 				{
-					vRightTable += '<td class=gdatehead align=center colspan=7>'
+					let vNxtDate = new Date(vTmpDate.getTime());
+					vNxtDate.setDate(vTmpDate.getDate()+7);
+					let isCurrent = vCurrDate >= vTmpDate && vCurrDate < vNxtDate;
+					vRightTable += '<td class="gdatehead'+(isCurrent?' current-week':'')+'" align=center colspan=7>'
 						+ JSGantt.formatDateStr(vTmpDate, vDateDisplayFormatCaptions[vFormat].from)
 						//+ JSGantt.formatDateStr(vTmpDate,vDateDisplayFormat.substring(0,5)) + ' - '
 						//+ "FIXME" + ' - '
@@ -1059,7 +1098,7 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 				if( vTaskList[i].getMile())
 				{
 					vRightTable += '<div><table style="position:relative; top:0px; width: ' + vChartWidth + 'px;">' +
-						'<tr id=childrow_' + vID + ' class=yesdisplay onmouseover="oJSGant.mouseOver(this,' + vID + ',\'right\',\'mile\')" onmouseout="oJSGant.mouseOut(this,' + vID + ',\'right\',\'mile\')">' + vItemRowStr + '</tr></table></div>';
+						'<tr id=childrow_' + vID + ' class=yesdisplay onmouseover="oJSGant.mouseOver(this,' + vID + ',\'right\',\'mile\')" onmouseout="oJSGant.mouseOut(this,' + vID + ',\'right\',\'mile\')>"' + vItemRowStr + '</TR></TABLE></DIV>';
 
 					// Build date string for Title
 					vDateRowStr = JSGantt.formatDateStr(vTaskStart,vDateDisplayFormat);
@@ -1068,8 +1107,8 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 					vTaskRight = 1
 
 					vRightTable +=
-						'<div id=bardiv_' + vID + ' style="position:absolute; top:0px; left:' + Math.ceil((vTaskLeft * (vDayWidth) - 2)) + 'px; height: 18px; width:15px; overflow:hidden;">' +
-						'  <div id=taskbar_' + vID + ' title="' + vTaskList[i].getName() + ': ' + vDateRowStr + '" style="position:relative;left:3px; height: 16px; width:12px; overflow:hidden; cursor: pointer;" onclick=JSGantt.taskLink("' + vTaskList[i].getLink() + '",300,200);>';
+						'<div id=bardiv_' + vID + ' style="position:absolute; top:0px; left:' + Math.ceil((vTaskLeft * (vDayWidth) + 1)) + 'px; height: 18px; width:160px; overflow:hidden;">' +
+						'  <div id=taskbar_' + vID + ' title="' + vTaskList[i].getName() + ': ' + vDateRowStr + '" style="height: 16px; width:12px; overflow:hidden; cursor: pointer;" onclick="JSGantt.taskLink(this, \'' + vTaskList[i].getLink() + '\',300,200);">';
 
 					if(vTaskList[i].getCompVal() < 100)
 						vRightTable += '&loz;</div>' ;
@@ -1124,13 +1163,13 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 					if( vTaskList[i].getGroup())
 					{
 						vRightTable += '<DIV><TABLE style="position:relative; top:0px; width: ' + vChartWidth + 'px;">' +
-							'<TR id=childrow_' + vID + ' class=yesdisplay bgColor=#f3f3f3 onMouseover="oJSGant.mouseOver(this,' + vID + ',\'right\',\'group\')" onMouseout="oJSGant.mouseOut(this,' + vID + ',\'right\',\'group\')">' + vItemRowStr + '</TR></TABLE></DIV>';
+							'<TR id=childrow_' + vID + ' class=yesdisplay bgColor=#f3f3f3 onMouseover=oJSGant.mouseOver(this,' + vID + ',"right","group") onMouseout=oJSGant.mouseOut(this,' + vID + ',"right","group")>' + vItemRowStr + '</TR></TABLE></DIV>';
 						vRightTable +=
 							'<div id=bardiv_' + vID + ' style="position:absolute; top:5px; left:' + Math.ceil(vTaskLeft * (vDayWidth) + 1) + 'px; height: 7px; width:' + Math.ceil((vTaskRight) * (vDayWidth) - 1) + 'px">' +
 								'<div id=taskbar_' + vID + ' title="' + vTaskList[i].getName() + ': ' + vDateRowStr + '" class=gtask style="background-color:#000000; height: 7px; width:' + Math.ceil((vTaskRight) * (vDayWidth) -1) + 'px;  cursor: pointer;opacity:0.9;">' +
 									'<div style="Z-INDEX: -4; float:left; background-color:#666666; height:3px; overflow: hidden; margin-top:1px; ' +
 										'margin-left:1px; margin-right:1px; filter: alpha(opacity=80); opacity:0.8; width:' + vTaskList[i].getCompStr() + '; ' + 
-										'cursor: pointer;" onclick=JSGantt.taskLink("' + vTaskList[i].getLink() + '",300,200);>' +
+										'cursor: pointer;" onclick="JSGantt.taskLink(this, \'' + vTaskList[i].getLink() + '\',300,200);">' +
 									'</div>' +
 								'</div>' +
 								'<div style="Z-INDEX: -4; float:left; background-color:#000000; height:4px; overflow: hidden; width:1px;"></div>' +
@@ -1164,7 +1203,7 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 						if (!isDuplicateTaskToBeMovedUp)
 						{
 							vDivStr = '<DIV><TABLE style="position:relative; top:0px; width: ' + vChartWidth + 'px;">' +
-								'<TR id=childrow_' + vID + ' class=yesdisplay bgColor=#ffffff onMouseover="oJSGant.mouseOver(this,' + vID + ',\'right\',\'row\')" onMouseout="oJSGant.mouseOut(this,' + vID + ',\'right\',\'row\')">' + vItemRowStr + '</TR></TABLE></DIV>';
+								'<TR id=childrow_' + vID + ' class=yesdisplay bgColor=#ffffff onMouseover=oJSGant.mouseOver(this,' + vID + ',"right","row") onMouseout=oJSGant.mouseOut(this,' + vID + ',"right","row")>' + vItemRowStr + '</TR></TABLE></DIV>';
 							vRightTable += vDivStr;
 						}
 						
@@ -1172,7 +1211,7 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 						vRightTable +=
 							'<div id=bardiv_' + vID + ' style="position:absolute; top:4px; left:' + Math.ceil(vTaskLeft * (vDayWidth) + 1) + 'px; width:' + Math.ceil((vTaskRight) * (vDayWidth) - 1) + 'px">' +
 								'<div id=taskbar_' + vID + ' title="' + vTaskList[i].getName() + ': ' + vDateRowStr + '" class=gtask style="background-color:#' + vTaskList[i].getColor() +'; height: 13px; width:' + Math.ceil((vTaskRight) * (vDayWidth) - 1) + 'px; cursor: pointer;opacity:0.9;" ' +
-									'onclick=JSGantt.taskLink("' + vTaskList[i].getLink() + '",300,200); >' +
+									'onclick="JSGantt.taskLink(this, \'' + vTaskList[i].getLink() + '\',300,200);" >' +
 									'<div class=gcomplete style="Z-INDEX: -4; float:left; background-color:black; height:5px; overflow: auto; margin-top:4px; filter: alpha(opacity=40); opacity:0.4; width:' + vTaskList[i].getCompStr() + '; overflow:hidden">' +
 									'</div>' +
 								'</div>'
@@ -1198,6 +1237,7 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 
 			vMainTable += vRightTable + '</DIV></TD></TR></TBODY></TABLE></div>';
 
+			// insert chart to main div (container)
 			vDiv.innerHTML = vMainTable;
 
 			// Chart window at full available size
@@ -1221,8 +1261,31 @@ JSGantt.GanttChart =  function(pGanttVar, pDiv, pFormat)
 			}
 			//
 		}
+		
+		// scroll chart
+		this.scrollToCurrent(vDiv);
 
 	} //this.draw
+	
+	// scroll current day/week/etc into view
+	this.scrollToCurrent = function( vDiv )
+	{
+		if (jQuery)
+		{
+			var $ = jQuery;
+			$(function()
+			{
+				var currentDayColumn = vDiv.querySelector('.current-week, td[bgcolor="#ccccff"]');
+				if (currentDayColumn) {
+					let chart = vDiv.querySelector('.chartarea');
+					let extra = chart.offsetWidth>>1; // ~half chart
+					// ~scrollIntoView, but only on X
+					chart.scrollLeft = currentDayColumn.offsetLeft - extra;
+					$(currentDayColumn).css('font-weight', 'bold');
+				}
+			});
+		}
+	}
 
 	this.mouseOver = function( pObj, pID, pPos, pType )
 	{
@@ -1629,10 +1692,10 @@ JSGantt.show =  function (pID, pTop, ganttObj)
 
 // function to open window to display task link
 
-JSGantt.taskLink = function(pRef,pWidth,pHeight) 
+JSGantt.taskLink = function(oLink,pRef,pWidth,pHeight) 
 {
-	if(pWidth)  vWidth =pWidth;  else vWidth =400;
-	if(pHeight) vHeight=pHeight; else vHeight=400;
+	vWidth =(pWidth)  ? pWidth  : 400;
+	vHeight=(pHeight) ? pHeight : 400;
 
 	var OpenWindow=window.open(pRef, "newwin", "height="+vHeight+",width="+vWidth);
 }
@@ -1649,184 +1712,128 @@ JSGantt.formatDateStr = function(pDate,pFormatStr)
 	return(vDateStr);
 }
 
-JSGantt.parseXML = function(ThisFile,pGanttVar)
-{
-	var is_chrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;   // Is this Chrome 
+/**
+	Parse tasks from URL to pGanttVar
 	
-	try { //Internet Explorer  
-		xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
-	}
-	catch(e)
-	{
-		try { //Firefox, Mozilla, Opera, Chrome etc. 
-			if (is_chrome==false) {  xmlDoc=document.implementation.createDocument("","",null); }
-		}
-		catch(e) {
-			alert(e.message);
-			return;
-		}
-	}
-
-	if (is_chrome==false)	// can't use xmlDoc.load in chrome at the moment
-	{
-		xmlDoc.async=false;
-		xmlDoc.load(ThisFile);		// we can use  loadxml
-		JSGantt.AddXMLTask(pGanttVar)
-		xmlDoc=null;			// a little tidying
-		Task = null;
-	}
-	else
-	{
-		JSGantt.ChromeLoadXML(ThisFile,pGanttVar);	
-		ta=null;	// a little tidying	
-	}
+	@param strTasksURL
+		URL to XML file with tasks
+	@param pGanttVar
+		GanttChart object - the object to which tasks must be added
+	
+	@note Must be called in GanttChart object context (the object to which tasks must be added)
+*/
+JSGantt.parseXML = function(strTasksURL, pGanttVar)
+{
+	var xmlDoc = oLoader.loadXMLDocFromURL(strTasksURL);
+	JSGantt.AddXMLTasks.call(pGanttVar, xmlDoc)
 }
 
-JSGantt.AddXMLTask = function(pGanttVar)
+/**
+	Parse tasks from code to pGanttVar
+	
+	@param strTasksURL
+		URL to XML file with tasks
+	@param pGanttVar
+		GanttChart object - the object to which tasks must be added
+	
+	@note Must be called in GanttChart object context (the object to which tasks must be added)
+*/
+JSGantt.parseXMLCode = function(strTasksXML, pGanttVar)
 {
-	Task=xmlDoc.getElementsByTagName("task");
+	var xmlDoc = oLoader.loadXMLDocFromStr(strTasksXML);
+	JSGantt.AddXMLTasks.call(pGanttVar, xmlDoc)
+}
+
+/**
+	Adds Tasks to this
+	
+	@param xmlDoc
+		An XML document object (DOM) of the tasks
+	
+	@note Must be called in GanttChart object context (the object to which tasks must be added)
+*/
+JSGantt.AddXMLTasks = function(xmlDoc)
+{
+	var Tasks=xmlDoc.getElementsByTagName("task");
+	
+	// automatic linking but only if baselink is available
+	var Baselink,Autolink;
+	try { Autolink = (parseInt(xmlDoc.getElementsByTagName("jsgantt")[0].getAttribute("autolink")) == 1)
+	} catch (error) { Autolink = false; }
+	if (Autolink)
+	{
+		try { Baselink = xmlDoc.getElementsByTagName("jsgantt")[0].getAttribute("baselink")
+		} catch (error) { Autolink = false; }
+	}
 	
 	//var n = xmlDoc.documentElement.childNodes.length;	// the number of tasks. IE gets this right, but mozilla add extra ones (Whitespace)
 	
 	//for(var i=0;i<n;i++)
-	for(var i=0;i<Task.length;i++)
+	for(var i=0;i<Tasks.length;i++)
 	{
 		// optional parameters may not have an entry (Whitespace from mozilla also returns an error )
 		// Task ID must NOT be zero other wise it will be skipped
-		try { pID = Task[i].getElementsByTagName("pID")[0].childNodes[0].nodeValue;
+		try { pID = Tasks[i].getElementsByTagName("pID")[0].childNodes[0].nodeValue;
 		} catch (error) {pID =0;}
 		pID *= 1;	// make sure that these are numbers rather than strings in order to make jsgantt.js behave as expected.
 
 		if(pID!=0)
 		{
-	 		try { pName = Task[i].getElementsByTagName("pName")[0].childNodes[0].nodeValue;
+	 		try { pName = Tasks[i].getElementsByTagName("pName")[0].childNodes[0].nodeValue;
 			} catch (error) {pName ="No Task Name";}			// If there is no corresponding entry in the XML file the set a default.
 		
-			try { pColor = Task[i].getElementsByTagName("pColor")[0].childNodes[0].nodeValue;
+			try { pColor = Tasks[i].getElementsByTagName("pColor")[0].childNodes[0].nodeValue;
 			} catch (error) {pColor ="0000ff";}
 			
-			try { pParent = Task[i].getElementsByTagName("pParent")[0].childNodes[0].nodeValue;
+			try { pParent = Tasks[i].getElementsByTagName("pParent")[0].childNodes[0].nodeValue;
 			} catch (error) {pParent =0;}
 			pParent *= 1;
 	
-			try { pStart = Task[i].getElementsByTagName("pStart")[0].childNodes[0].nodeValue;
+			try { pStart = Tasks[i].getElementsByTagName("pStart")[0].childNodes[0].nodeValue;
 			} catch (error) {pStart ="";}
 
-			try { pEnd = Task[i].getElementsByTagName("pEnd")[0].childNodes[0].nodeValue;
+			try { pEnd = Tasks[i].getElementsByTagName("pEnd")[0].childNodes[0].nodeValue;
 			} catch (error) { pEnd ="";}
 
-			try { pLink = Task[i].getElementsByTagName("pLink")[0].childNodes[0].nodeValue;
+			try { pLink = Tasks[i].getElementsByTagName("pLink")[0].childNodes[0].nodeValue;
 			} catch (error) { pLink ="";}
+			
+			// adding link if autolinkig is on
+			if (Autolink && pLink.length <= 0)
+			{
+				pLink = Baselink + pID.toString();
+			}
 	
-			try { pMile = Task[i].getElementsByTagName("pMile")[0].childNodes[0].nodeValue;
+			try { pMile = Tasks[i].getElementsByTagName("pMile")[0].childNodes[0].nodeValue;
 			} catch (error) { pMile=0;}
 			pMile *= 1;
 
-			try { pRes = Task[i].getElementsByTagName("pRes")[0].childNodes[0].nodeValue;
+			try { pRes = Tasks[i].getElementsByTagName("pRes")[0].childNodes[0].nodeValue;
 			} catch (error) { pRes ="";}
 
-			try { pComp = Task[i].getElementsByTagName("pComp")[0].childNodes[0].nodeValue;
+			try { pComp = Tasks[i].getElementsByTagName("pComp")[0].childNodes[0].nodeValue;
 			} catch (error) {pComp =0;}
 			pComp *= 1;
 
-			try { pGroup = Task[i].getElementsByTagName("pGroup")[0].childNodes[0].nodeValue;
+			try { pGroup = Tasks[i].getElementsByTagName("pGroup")[0].childNodes[0].nodeValue;
 			} catch (error) {pGroup =0;}
 			pGroup *= 1;
 
-			try { pOpen = Task[i].getElementsByTagName("pOpen")[0].childNodes[0].nodeValue;
+			try { pOpen = Tasks[i].getElementsByTagName("pOpen")[0].childNodes[0].nodeValue;
 			} catch (error) { pOpen =1;}
 			pOpen *= 1;
 
-			try { pDepend = Task[i].getElementsByTagName("pDepend")[0].childNodes[0].nodeValue;
+			try { pDepend = Tasks[i].getElementsByTagName("pDepend")[0].childNodes[0].nodeValue;
 			} catch (error) { pDepend =0;}
 			//pDepend *= 1;
 			if (pDepend.length==0){pDepend=''} // need this to draw the dependency lines
 			
-			try { pCaption = Task[i].getElementsByTagName("pCaption")[0].childNodes[0].nodeValue;
+			try { pCaption = Tasks[i].getElementsByTagName("pCaption")[0].childNodes[0].nodeValue;
 			} catch (error) { pCaption ="";}
 			
 			
 			// Finally add the task
-			pGanttVar.AddTaskItem(new JSGantt.TaskItem(pID , pName, pStart, pEnd, pColor,  pLink, pMile, pRes,  pComp, pGroup, pParent, pOpen, pDepend,pCaption));
-		}
-	}
-}
-
-JSGantt.ChromeLoadXML = function(ThisFile,pGanttVar)
-{
-	// Thanks to vodobas at mindlence,com for the initial pointers here.
-	XMLLoader = new XMLHttpRequest();
-	XMLLoader.onreadystatechange= function()
-	{
-		JSGantt.ChromeXMLParse(pGanttVar);
-	};
-	XMLLoader.open("GET", ThisFile, false);
-	XMLLoader.send(null);
-}
-
-JSGantt.ChromeXMLParse = function (pGanttVar)
-{
-	// Manually parse the file as it is loads quicker
-	if (XMLLoader.readyState == 4)
-	{
-		var ta=XMLLoader.responseText.split(/<task>/gi);
-
-		var n = ta.length;	// the number of tasks. 
-		for(var i=1;i<n;i++) {
-			Task = ta[i].replace(/<[/]p/g, '<p');	
-			var te = Task.split(/<pid>/i)
-	
-			if(te.length> 2){var pID=te[1];} else {var pID = 0;}
-			pID *= 1;
-	
-			var te = Task.split(/<pName>/i)
-			if(te.length> 2){var pName=te[1];} else {var pName = "No Task Name";}
-	
-			var te = Task.split(/<pstart>/i)
-			if(te.length> 2){var pStart=te[1];} else {var pStart = "";}
-	
-			var te = Task.split(/<pEnd>/i)
-			if(te.length> 2){var pEnd=te[1];} else {var pEnd = "";}
-	
-			var te = Task.split(/<pColor>/i)
-			if(te.length> 2){var pColor=te[1];} else {var pColor = '0000ff';}
-
-			var te = Task.split(/<pLink>/i)
-			if(te.length> 2){var pLink=te[1];} else {var pLink = "";}
-	
-			var te = Task.split(/<pMile>/i)
-			if(te.length> 2){var pMile=te[1];} else {var pMile = 0;}
-			pMile  *= 1;
-	
-			var te = Task.split(/<pRes>/i)
-			if(te.length> 2){var pRes=te[1];} else {var pRes = "";}	
-	
-			var te = Task.split(/<pComp>/i)
-			if(te.length> 2){var pComp=te[1];} else {var pComp = 0;}	
-			pComp  *= 1;
-	
-			var te = Task.split(/<pGroup>/i)
-			if(te.length> 2){var pGroup=te[1];} else {var pGroup = 0;}	
-			pGroup *= 1;
-
-			var te = Task.split(/<pParent>/i)
-			if(te.length> 2){var pParent=te[1];} else {var pParent = 0;}	
-			pParent *= 1;
-	
-			var te = Task.split(/<pOpen>/i)
-			if(te.length> 2){var pOpen=te[1];} else {var pOpen = 1;}
-			pOpen *= 1;
-	
-			var te = Task.split(/<pDepend>/i)
-			if(te.length> 2){var pDepend=te[1];} else {var pDepend = "";}	
-			//pDepend *= 1;
-			if (pDepend.length==0){pDepend=''} // need this to draw the dependency lines
-			
-			var te = Task.split(/<pCaption>/i)
-			if(te.length> 2){var pCaption=te[1];} else {var pCaption = "";}
-			
-			// Finally add the task
-			pGanttVar.AddTaskItem(new JSGantt.TaskItem(pID , pName, pStart, pEnd, pColor,  pLink, pMile, pRes,  pComp, pGroup, pParent, pOpen, pDepend,pCaption 	));
+			this.AddTaskItem(new JSGantt.TaskItem(pID , pName, pStart, pEnd, pColor,  pLink, pMile, pRes,  pComp, pGroup, pParent, pOpen, pDepend,pCaption));
 		}
 	}
 }

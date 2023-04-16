@@ -10,7 +10,7 @@ var oJSGantInline = {
 	//! @note Some settings also in this.init
 	conf : {
 		elGantDivID : 'GanttChartInline',	// gant element (a link should be added to it)
-		intNamesWidth : 300,			// names width
+		intNamesWidth : 500,			// names width
 		strDefaultViewFormat : 'day',		// ("day","week","month","quarter")
 		strDateInputFormat : 'Y-m-d',		// date format of the input
 		strDateDisplayFormat : 'Y-m-d',		// basic date format
@@ -66,8 +66,12 @@ oJSGantInline.init = function()
 	oJSGant.setDateDisplayFormat (this.conf.strDateDisplayFormat);
 	oJSGant.setDateDisplayFormatCaptions (this.conf.oDateDisplayFormatCaptions);
 	
-	// see JSGantt.attributeMapping for attribute name to option mapping
-	JSGantt.AttributeParser.setOptions(elGantDiv, oJSGant, 'data-');
+	oJSGant.setShowRes(0); // Show/Hide Responsible (0/1)
+	oJSGant.setShowDur(0); // Show/Hide Duration (0/1)
+	oJSGant.setShowComp(0); // Show/Hide % Complete(0/1)
+	oJSGant.setShowStartDate(0);
+	oJSGant.setShowEndDate(0);
+	oJSGant.setCaptionType('Resource');  // Set to Show Caption (None,Caption,Resource,Duration,Complete)
 }
 
 //
@@ -86,6 +90,16 @@ oJSGantInline.draw = function()
 	}
 }
 
+//
+// Re-draw Gantt with given code
+//
+oJSGantInline.redraw = function(strTasksXML)
+{
+	oJSGant.ClearTasksData();                    // clear
+	JSGantt.parseXMLCode (strTasksXML, oJSGant); // push new data
+	oJSGant.Draw(this.conf.intNamesWidth);       // draw tasks
+	oJSGant.DrawDependencies();                  // draw dependencies lines
+}
 
 //
 // Loader init

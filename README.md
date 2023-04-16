@@ -6,6 +6,8 @@ This is a MediaWiki extension that aims to allow adding Gantt charts (diagrams) 
 For more info please see:
 https://www.mediawiki.org/wiki/Extension:JSWikiGantt
 
+As of `0.7.0` the scripts will no longer work in IE (and other ES5 browsers).
+
 Options
 ------------
 

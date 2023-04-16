@@ -70,19 +70,6 @@ class ecJSGantt {
 		// ret renedered HTML
 		return $strRendered;
 	}
-	
-	/**
-		Render arguments to HTML element attributes.
-		
-		To conform with HTML5 `data-` prefixed attributes are produced.
-	*/
-	private static function argsToAttributes( $args ) {
-		$attrs = '';
-		foreach ( $args as $key => $value ) {
-			$attrs .= " data-{$key}='" . htmlspecialchars($value) . "'";
-		}
-		return $attrs;
-	}
 
 	/**
 		Render our tag for the purpouse of loading an external XML
@@ -94,7 +81,7 @@ class ecJSGantt {
 		$out = $parser->replaceInternalLinks( $input, $frame );	// just parse links
 		return ''
 			.Html::linkedScript( $this->getCSSJSLink( "jsgantt_loader.js" ) )
-			.'<div id="GanttChartDIV" '.self::argsToAttributes( $args ).'>'
+			.'<div id="GanttChartDIV">'
 				.$out
 			.'</div>'
 		;
@@ -146,14 +133,14 @@ class ecJSGantt {
 	*/
 	private function renderInnerXML( $input, $args, $parser, $frame ) {
 		$doc = new DOMDocument();
-		/**
+		/*
 		// DEBUG
 		echo "<pre style='position:absolute; top:2em; right:0; width:200px; overflow:scroll; z-index:100' onclick='this.style.display=\"none\"'>"
 			.htmlspecialchars( var_export( $args, true ) )
 			.htmlspecialchars( $input )
 		."</pre>"
 		;
-		/**/
+		*/
 		// get task elements
 		wfSuppressWarnings();
 		$doc->loadXML( '<root>'.$input.'</root>' );
@@ -168,13 +155,25 @@ class ecJSGantt {
 		// should we add links to details of tasks?
 		$isAddAutoLinks = !isset( $args['autolink'] ) ? '' : $args['autolink'];
 		$isAddAutoLinks = strlen( $isAddAutoLinks ) ? intval( $isAddAutoLinks ) : $this->config['AutoLinks'];
+		// auto link base/tpl
+		$strTasksAutoLink = '';
+		if ( $isAddAutoLinks ) {
+			$strTasksAutoLink = !isset( $args['baselink'] ) ? '' : $args['baselink'];
+			if ( empty( $strTasksAutoLink ) ) {
+				$strTasksAutoLink = $this->config['TasksAutoLink'];
+			}
+			// check if replace val is available and if not add it to end
+			if ( strpos( $strTasksAutoLink, '%GANTT_TASK_ID%' ) === false ) {
+				$strTasksAutoLink .= '%GANTT_TASK_ID%';
+			}
+		}
 		
 		// prepare script contents
 		$strScript = '';
 		for ( $i = 0; $i < $tasks->length; $i++ ) {
 			// The ID is required!
 			wfSuppressWarnings();
-			$pID = intval( $tasks->item( $i )->getElementsByTagName( "pID" )->item( 0 )->nodeValue );
+			$pID = $tasks->item( $i )->getElementsByTagName( "pID" )->item( 0 )->nodeValue;
 			wfRestoreWarnings();
 			if( empty( $pID ) ) {
 				//! @todo some error message here?
@@ -208,7 +207,7 @@ class ecJSGantt {
 			
 			// Add auto link
 			if ( $isAddAutoLink && empty( $pLink ) ) {
-				$pLink = str_replace( '%GANTT_TASK_ID%', $pID, $this->config['TasksAutoLink'] );
+				$pLink = str_replace( '%GANTT_TASK_ID%', intval($pID), $strTasksAutoLink );
 			}
 			
 			// Finally add the task
@@ -242,7 +241,10 @@ class ecJSGantt {
 			$this->strInlineOutput = $strScript;
 			return ''
 				.Html::linkedScript( $this->getCSSJSLink( "jsgantt_inline.js" ) )
-				.'<div id="GanttChartInline" '.self::argsToAttributes( $args ).'></div>'
+				.Html::linkedScript( $this->getCSSJSLink( "jsgantt.update.js" ) )
+				.Html::linkedScript( $this->getCSSJSLink( "jsgantt.add.js" ) )
+				// .Html::linkedScript( $this->getCSSJSLink( "jsgantt.molextra.js" ) )
+				.'<div id="GanttChartInline"></div>'
 				//.$strScript
 				.$this->strInlineOutputMarker;
 			;
